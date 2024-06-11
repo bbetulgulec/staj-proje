@@ -28,6 +28,15 @@ class _LoginPageState extends State<Login_page> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
 
+            //APP ICON
+
+            Image.asset(
+              'lib/assest/image/splash_icon.png',
+              height: 100.0, 
+              width: 100.0,
+
+            ),
+             SizedBox(height: 40.0),
 
 
             //GİRİŞ YAP YAZISI
@@ -84,8 +93,43 @@ class _LoginPageState extends State<Login_page> {
             ),
             SizedBox(height: 20.0),
 
-            //GİRİŞ YAP BUTTON
+            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
 
+            //HESAP OLUŞTUR BUTTON
+
+            ElevatedButton.icon(
+              onPressed: () {
+              Navigator.push(
+                context,
+                 MaterialPageRoute(
+                builder: (context) => const AccountPage(),
+                 ),
+                 );
+
+              },
+              label: Text(
+                "Hesap Oluştur",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),
+              ),
+              icon: Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: HexColor(buttonColor),
+                padding: EdgeInsets.symmetric(horizontal: 20,),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+              ),
+            ),
+            SizedBox(height: 100.0),
+            Padding(
+                padding: EdgeInsets.only(right: 50),), // Padding ile boşluk ekleme
+
+            //GİRİŞ YAP BUTTON
             ElevatedButton.icon(
               onPressed: () {
                 setState(() {
@@ -117,42 +161,20 @@ class _LoginPageState extends State<Login_page> {
               icon: Icon(Icons.check, color: Colors.white),
               style: ElevatedButton.styleFrom(
                 backgroundColor: HexColor(buttonColor),
-                fixedSize: Size(180, 60),
-              ),
-            ),
-            SizedBox(height: 20.0),
-
-            //HESAP OLUŞTUR BUTTON
-
-            ElevatedButton.icon(
-              onPressed: () {
-              Navigator.push(
-                context,
-                 MaterialPageRoute(
-                builder: (context) => const AccountPage(),
-                 ),
-                 );
-
-              },
-              label: Text(
-                "Hesap Oluştur",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),
-              ),
-              icon: Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: HexColor(buttonColor),
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),
               ),
+              
             ),
             SizedBox(height: 20.0),
+            
+              ]
+            ),
+
 
             //ŞİFREMİ UNUTTUM BUTTON
-
+            
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
@@ -168,7 +190,9 @@ class _LoginPageState extends State<Login_page> {
                   color: Colors.white, // Yazı mavi olacak
                 ),
               ),
-            )
+            ),
+            Padding(
+                padding: EdgeInsets.only(bottom: 100),),
           ],
         ),
       ),
