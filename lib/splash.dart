@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/const/color.dart';
-import 'package:remember_medicine/login.dart';
+import 'package:remember_medicine/page/auth/login.dart';
 
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({super.key});

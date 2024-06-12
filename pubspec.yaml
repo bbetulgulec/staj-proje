@@ -29,9 +29,13 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   email_validator: ^2.1.17
+  firebase_core: ^3.1.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.0.1
   flutter:
     sdk: flutter
   hexcolor: ^3.0.1
+
 cupertino_icons: ^1.0.6
 hexcolor: ^3.0.1
 email_validator: ^2.0.1  # Eksik olan paket burada eklendi
