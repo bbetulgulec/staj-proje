@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,7 +19,6 @@ class _LoginPageState extends State<Login_page> {
 
   late String email,password;
   final formKey=GlobalKey<FormState>();
-  final firebaseAuth=FirebaseAuth.instance;
   
 
   @override
@@ -201,8 +199,6 @@ class _LoginPageState extends State<Login_page> {
             if(formKey.currentState!.validate()){
               formKey.currentState!.save();
               try{
-                final userResult=await firebaseAuth.signInWithEmailAndPassword(
-                email: email, password: password);
 
               }
               catch(e){

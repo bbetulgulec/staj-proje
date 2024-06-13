@@ -41,46 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA7kMJRSDEdBPA9n6wyUDSYIBg6EtDzcYA',
-    appId: '1:567544252680:web:e4caf57b40147594ca84bd',
-    messagingSenderId: '567544252680',
-    projectId: 'medicine-28633',
-    authDomain: 'medicine-28633.firebaseapp.com',
-    storageBucket: 'medicine-28633.appspot.com',
+    apiKey: 'AIzaSyChJdO3zMojqswZvzCJru3ugHEKne-pihM',
+    appId: '1:1046634708335:web:1e17d5157755274f6f3c9a',
+    messagingSenderId: '1046634708335',
+    projectId: 'medicine-db-58c31',
+    authDomain: 'medicine-db-58c31.firebaseapp.com',
+    storageBucket: 'medicine-db-58c31.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDyxIPmaByJVggQZzgApwhvRolAkMfnnow',
-    appId: '1:567544252680:android:90273d80d3f45ab0ca84bd',
-    messagingSenderId: '567544252680',
-    projectId: 'medicine-28633',
-    storageBucket: 'medicine-28633.appspot.com',
+    apiKey: 'AIzaSyD0wwE-kP8P4ILUVny9Kt8yGp-FGZZnC94',
+    appId: '1:1046634708335:android:93f9a1af73f86baa6f3c9a',
+    messagingSenderId: '1046634708335',
+    projectId: 'medicine-db-58c31',
+    storageBucket: 'medicine-db-58c31.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDSNOeKm2Ik02p39lXJ5Ehks5SASCzs5a8',
-    appId: '1:567544252680:ios:fe059b7249bb9dfcca84bd',
-    messagingSenderId: '567544252680',
-    projectId: 'medicine-28633',
-    storageBucket: 'medicine-28633.appspot.com',
+    apiKey: 'AIzaSyCSQtwfNsdPxOqc_2NJNvjWWZ9ekIhPE0U',
+    appId: '1:1046634708335:ios:e2799d726fef1cb06f3c9a',
+    messagingSenderId: '1046634708335',
+    projectId: 'medicine-db-58c31',
+    storageBucket: 'medicine-db-58c31.appspot.com',
     iosBundleId: 'com.example.rememberMedicine',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDSNOeKm2Ik02p39lXJ5Ehks5SASCzs5a8',
-    appId: '1:567544252680:ios:fe059b7249bb9dfcca84bd',
-    messagingSenderId: '567544252680',
-    projectId: 'medicine-28633',
-    storageBucket: 'medicine-28633.appspot.com',
+    apiKey: 'AIzaSyCSQtwfNsdPxOqc_2NJNvjWWZ9ekIhPE0U',
+    appId: '1:1046634708335:ios:e2799d726fef1cb06f3c9a',
+    messagingSenderId: '1046634708335',
+    projectId: 'medicine-db-58c31',
+    storageBucket: 'medicine-db-58c31.appspot.com',
     iosBundleId: 'com.example.rememberMedicine',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyA7kMJRSDEdBPA9n6wyUDSYIBg6EtDzcYA',
-    appId: '1:567544252680:web:e635dbafde14c8fdca84bd',
-    messagingSenderId: '567544252680',
-    projectId: 'medicine-28633',
-    authDomain: 'medicine-28633.firebaseapp.com',
-    storageBucket: 'medicine-28633.appspot.com',
+    apiKey: 'AIzaSyChJdO3zMojqswZvzCJru3ugHEKne-pihM',
+    appId: '1:1046634708335:web:bc99606b7746c5316f3c9a',
+    messagingSenderId: '1046634708335',
+    projectId: 'medicine-db-58c31',
+    authDomain: 'medicine-db-58c31.firebaseapp.com',
+    storageBucket: 'medicine-db-58c31.appspot.com',
   );
 }
