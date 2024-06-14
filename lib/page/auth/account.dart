@@ -1,31 +1,27 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:remember_medicine/page/auth/account.dart';
 import 'package:remember_medicine/const/color.dart';
-import "package:email_validator/email_validator.dart";
+import 'package:remember_medicine/page/auth/info_medicine.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class account_page extends StatefulWidget {
-
-  const account_page({Key? key}) : super(key: key);
+class AccountPage extends StatefulWidget {
+  const AccountPage({Key? key}) : super(key: key);
 
   @override
-  State<account_page> createState() => _account_page();
+  State<AccountPage> createState() => _AccountPageState();
 }
 
-class _account_page extends State<account_page> {
-  
+class _AccountPageState extends State<AccountPage> {
   late String email, password, name, surname, gender;
   late String age, number, height, weight;
   final formKey = GlobalKey<FormState>();
   final firebaseAuth = FirebaseAuth.instance;
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+  bool _obscureText = true; // Şifre gizleme durumu
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +90,10 @@ class _account_page extends State<account_page> {
                     heighttextfield(),
                     customSizeBox(),
                     passwordtextfield(),
+                    customSizeBox(),
                     createAccountButton(),
-                    BacktoLoginButton(),
+                    customSizeBox(),
+                    backToLoginButton(),
                   ],
                 ),
               ),
@@ -112,7 +110,7 @@ class _account_page extends State<account_page> {
       style: TextStyle(
         fontSize: 30,
         fontWeight: FontWeight.bold,
-        color: HexColor(primaryColor),
+        color: HexColor('#3F51B5'), // replace with your primaryColor
       ),
     );
   }
@@ -130,7 +128,7 @@ class _account_page extends State<account_page> {
         name = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Ad "),
+      decoration: customInputDecoration("Ad "),
     );
   }
 
@@ -147,7 +145,7 @@ class _account_page extends State<account_page> {
         surname = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Soyad "),
+      decoration: customInputDecoration("Soyad "),
     );
   }
 
@@ -164,7 +162,7 @@ class _account_page extends State<account_page> {
         age = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Yaş "),
+      decoration: customInputDecoration("Yaş "),
     );
   }
 
@@ -181,7 +179,7 @@ class _account_page extends State<account_page> {
         number = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Telefon "),
+      decoration: customInputDecoration("Telefon "),
     );
   }
 
@@ -198,7 +196,7 @@ class _account_page extends State<account_page> {
         height = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Boy "),
+      decoration: customInputDecoration("Boy "),
     );
   }
 
@@ -215,7 +213,7 @@ class _account_page extends State<account_page> {
         weight = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Kilo "),
+      decoration: customInputDecoration("Kilo "),
     );
   }
 
@@ -232,7 +230,7 @@ class _account_page extends State<account_page> {
         gender = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("Cinsiyet "),
+      decoration: customInputDecoration("Cinsiyet "),
     );
   }
 
@@ -241,6 +239,8 @@ class _account_page extends State<account_page> {
       validator: (value) {
         if (value!.isEmpty) {
           return "Bir e-posta adresi giriniz ";
+        } else if (!EmailValidator.validate(value!)) {
+          return "Geçerli bir e-posta adresi giriniz";
         } else {
           return null;
         }
@@ -249,7 +249,7 @@ class _account_page extends State<account_page> {
         email = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("E-Mail "),
+      decoration: customInputDecoration("E-Mail "),
     );
   }
 
@@ -258,31 +258,57 @@ class _account_page extends State<account_page> {
       validator: (value) {
         if (value!.isEmpty) {
           return "Şifrenizi giriniz ";
-        } else {
+        } else if (value.length < 6) {
+          return "Şifreniz en az 6 karakter olmalıdır";
+        } 
+        else {
           return null;
         }
       },
       onSaved: (value) {
         password = value!;
       },
-      decoration: costumInputDecaretion("şifre "),
+      obscureText: _obscureText, // Şifre gizleme durumu
+      decoration: InputDecoration(
+        hintText: "Şifre",
+        hintStyle: TextStyle(
+          color: Colors.grey,
+          fontSize: 20,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black), // replace with your backgroundColor
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black), // replace with your buttonColor
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscureText ? Icons.visibility : Icons.visibility_off,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
+          },
+        ),
+      ),
     );
   }
 
   Center createAccountButton() {
     return Center(
       child: ElevatedButton.icon(
-        onPressed: createAccount,
+        onPressed: saved,
         label: Text(
-          "Hesap Oluştur",
+          "Kayıt Et",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 30.0,
+            fontSize: 23.0,
           ),
         ),
-        icon: Icon(Icons.arrow_forward_ios, color: Colors.white),
+        icon: Icon(Icons.check, color: Colors.white),
         style: ElevatedButton.styleFrom(
-          backgroundColor: HexColor(buttonColor),
+          backgroundColor: HexColor(buttonColor), // replace with your buttonColor
           padding: EdgeInsets.symmetric(horizontal: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -292,7 +318,7 @@ class _account_page extends State<account_page> {
     );
   }
 
-  void createAccount() async {
+  Future<void> saved() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
       try {
@@ -301,9 +327,9 @@ class _account_page extends State<account_page> {
           email: email,
           password: password,
         );
-         print('Veri başarıyla authanticationa kayıt oldu ');
+        print('Veri başarıyla authenticationa kayıt oldu');
 
-        // Firebase Realtime Database'e kullanıcı bilgilerini kaydetme
+        // Kullanıcı bilgilerini Firebase Realtime Database'e kaydet
         await databaseReference.child('users').child(userResult.user!.uid).set({
           'name': name,
           'surname': surname,
@@ -315,11 +341,10 @@ class _account_page extends State<account_page> {
           'height': height,
           // Diğer kullanıcı bilgileri
         });
-         print('Veri başarıyla yazıldı');
 
         formKey.currentState!.reset();
         ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+          SnackBar(
             content: Text(
               "Kayıt Oluşturuldu",
               style: TextStyle(
@@ -330,21 +355,31 @@ class _account_page extends State<account_page> {
         );
 
         // Kayıt işlemi tamamlandıktan sonra login sayfasına yönlendirme
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Login_page()),
+          MaterialPageRoute(builder: (context) => const InfoMedicine()),
         );
       } catch (e) {
         print(e.toString());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Kayıt Oluşturulamadı: ${e.toString()}",
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            ),
+          ),
+        );
       }
     }
   }
 
-  Center BacktoLoginButton() {
+  Center backToLoginButton() {
     return Center(
       child: ElevatedButton.icon(
         onPressed: () {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Login_page()),
           );
@@ -353,13 +388,13 @@ class _account_page extends State<account_page> {
           "Giriş sayfasına geri dön",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20.0,
+            fontSize: 15.0,
           ),
         ),
         icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
         style: ElevatedButton.styleFrom(
-          backgroundColor: HexColor(buttonColor),
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          backgroundColor: HexColor(buttonColor), // replace with your buttonColor
+          padding: EdgeInsets.symmetric(horizontal: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -368,11 +403,9 @@ class _account_page extends State<account_page> {
     );
   }
 
-  Widget customSizeBox() => SizedBox(
-        height: 20.0,
-      );
+  Widget customSizeBox() => SizedBox(height: 20.0,);
 
-  InputDecoration costumInputDecaretion(String hintText) {
+  InputDecoration customInputDecoration(String hintText) {
     return InputDecoration(
       hintText: hintText,
       hintStyle: TextStyle(
@@ -380,12 +413,11 @@ class _account_page extends State<account_page> {
         fontSize: 20,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(backgroundColor)),
+        borderSide: BorderSide(color: HexColor(backgroundColor)), // replace with your backgroundColor
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(buttonColor)),
+        borderSide: BorderSide(color: HexColor(buttonColor)), // replace with your buttonColor
       ),
     );
   }
 }
-
