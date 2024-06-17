@@ -253,47 +253,47 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  TextFormField passwordtextfield() {
-    return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Şifrenizi giriniz ";
-        } else if (value.length < 6) {
-          return "Şifreniz en az 6 karakter olmalıdır";
-        } 
-        else {
-          return null;
-        }
-      },
-      onSaved: (value) {
-        password = value!;
-      },
-      obscureText: _obscureText, // Şifre gizleme durumu
-      decoration: InputDecoration(
-        hintText: "Şifre",
-        hintStyle: TextStyle(
-          color: Colors.grey,
-          fontSize: 20,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black), // replace with your backgroundColor
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black), // replace with your buttonColor
-        ),
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscureText ? Icons.visibility : Icons.visibility_off,
-          ),
-          onPressed: () {
-            setState(() {
-              _obscureText = !_obscureText;
-            });
-          },
-        ),
+ TextFormField passwordtextfield() {
+  return TextFormField(
+    validator: (value) {
+      if (value!.isEmpty) {
+        return "Şifrenizi giriniz ";
+      } else if (value.length < 6) {
+        return "Şifreniz en az 6 karakter olmalıdır";
+      } 
+      else {
+        return null;
+      }
+    },
+    onSaved: (value) {
+      password = value!;
+    },
+    obscureText: _obscureText, // Şifre gizleme durumu
+    decoration: InputDecoration(
+      hintText: "Şifre",
+      hintStyle: TextStyle(
+        color: Colors.grey,
+        fontSize: 20,
       ),
-    );
-  }
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: HexColor(backgroundColor)), // replace with your backgroundColor
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color:HexColor(backgroundColor)), // replace with your buttonColor
+      ),
+      suffixIcon: IconButton(
+        icon: Icon(
+          _obscureText ? Icons.visibility : Icons.visibility_off,
+        ),
+        onPressed: () {
+          setState(() {
+            _obscureText = !_obscureText;
+          });
+        },
+      ),
+    ),
+  );
+}
 
   Center createAccountButton() {
     return Center(
@@ -339,6 +339,7 @@ class _AccountPageState extends State<AccountPage> {
           'gender': gender,
           'weight': weight,
           'height': height,
+          'pasword':password
           // Diğer kullanıcı bilgileri
         });
 
@@ -357,7 +358,7 @@ class _AccountPageState extends State<AccountPage> {
         // Kayıt işlemi tamamlandıktan sonra login sayfasına yönlendirme
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const InfoMedicine()),
+          MaterialPageRoute(builder: (context) => InfoMedicine()),
         );
       } catch (e) {
         print(e.toString());
