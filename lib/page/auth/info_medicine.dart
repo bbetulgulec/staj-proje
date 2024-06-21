@@ -450,7 +450,7 @@ SingleChildScrollView animatedContainerMedicine() {
 
       // Seçilen gün ve saat için verileri eklemek
       final dayRef = medicineRef.child('days').child(selectedDay);
-      await dayRef.child('times').push().set(selectedTime);
+      await dayRef.child('times').set(selectedTime);
     }
   }
 
