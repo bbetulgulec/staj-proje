@@ -5,7 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:remember_medicine/const/color.dart';
 
 class MedicinesPage2 extends StatefulWidget {
-  const MedicinesPage2({super.key});
+  const MedicinesPage2({super.key, required String medicineName, required Map medicineData});
 
   @override
   State<MedicinesPage2> createState() => _MedicinesPage2State();

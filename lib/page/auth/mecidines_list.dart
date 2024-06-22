@@ -16,6 +16,24 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
   final firebaseAuth = FirebaseAuth.instance;
 
+  Future<void> _deleteMedicine(String userId, String medicineName) async {
+    await databaseReference.child('users').child(userId).child('medicines').child(medicineName).remove();
+  }
+
+  Future<void> _updateMedicine(String userId, String medicineName, Map<dynamic, dynamic> medicineData) async {
+    // Bu metodu kullanarak ilaç güncelleme işlemlerini yapabilirsiniz.
+    // İlaç güncelleme için gerekli sayfaya yönlendirme ya da güncelleme işlemini burada tanımlayabilirsiniz.
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MedicinesPage2(
+          medicineName: medicineName,
+          medicineData: medicineData,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     User? user = firebaseAuth.currentUser;
@@ -37,7 +55,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const MedicinesPage2(),
+              builder: (context) => const MedicinesListPage(),
             ),
           );
         },
@@ -74,11 +92,52 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                       margin: EdgeInsets.symmetric(vertical: 10.0),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("İlaç Adı: $medicineName"),
-                            Text("Bilgiler: $medicineData"),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("İlaç Adı: $medicineName"),
+                                Text("Bilgiler: $medicineData"),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    _updateMedicine(user.uid, medicineName, medicineData as Map);
+                                  },
+                                  child: Icon(Icons.edit),
+                                ),
+                                SizedBox(width: 8.0),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () async {
+                                    bool? confirmDelete = await showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text('Silmek istediğinize emin misiniz?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: Text('Hayır'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: Text('Evet'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirmDelete == true) {
+                                      _deleteMedicine(user.uid, medicineName);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -89,18 +148,69 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                       margin: EdgeInsets.symmetric(vertical: 10.0),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("İlaç Adı: $medicineName"),
-                            ...medicineData['days'].entries.map((entry) {
-                              String day = entry.key;
-                              String time = entry.value['times'];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                                child: Text("Günü: $day, Saati: $time"),
-                              );
-                            }).toList(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("İlaç Adı: $medicineName"),
+                                ...medicineData['days'].entries.map((entry) {
+                                  String day = entry.key;
+                                  var timeData = entry.value;
+
+                                  // timeData'nın türünü kontrol et ve ona göre işleme yap
+                                  if (timeData is Map<dynamic, dynamic> && timeData.containsKey('times')) {
+                                    String time = timeData['times'];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                                      child: Text("Günü: $day, Saati: $time"),
+                                    );
+                                  } else {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                                      child: Text("Günü: $day, Saati: Bilinmiyor"),
+                                    );
+                                  }
+                                }).toList(),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    _updateMedicine(user.uid, medicineName, medicineData);
+                                  },
+                                  child: Icon(Icons.edit),
+                                ),
+                                SizedBox(width: 8.0),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () async {
+                                    bool? confirmDelete = await showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text('Silmek istediğinize emin misiniz?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: Text('Hayır'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: Text('Evet'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirmDelete == true) {
+                                      _deleteMedicine(user.uid, medicineName);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -111,11 +221,52 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                       margin: EdgeInsets.symmetric(vertical: 10.0),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("İlaç Adı: $medicineName"),
-                            Text("Bilinmeyen veri formatı"),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("İlaç Adı: $medicineName"),
+                                Text("Bilinmeyen veri formatı"),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    _updateMedicine(user.uid, medicineName, medicineData);
+                                  },
+                                  child: Icon(Icons.edit),
+                                ),
+                                SizedBox(width: 8.0),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () async {
+                                    bool? confirmDelete = await showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text('Silmek istediğinize emin misiniz?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: Text('Hayır'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: Text('Evet'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirmDelete == true) {
+                                      _deleteMedicine(user.uid, medicineName);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
