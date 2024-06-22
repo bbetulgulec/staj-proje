@@ -5,7 +5,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:remember_medicine/const/color.dart';
 
 class MedicinesPage2 extends StatefulWidget {
-  const MedicinesPage2({super.key, required String medicineName, required Map medicineData});
+  final String medicineName;
+  final Map<dynamic, dynamic> medicineData;
+
+  const MedicinesPage2({super.key, required this.medicineName, required this.medicineData});
 
   @override
   State<MedicinesPage2> createState() => _MedicinesPage2State();
@@ -35,8 +38,17 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    nameController.text = widget.medicineName;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('İlaç Güncelle'),
+      ),
       body: Container(
         margin: const EdgeInsets.only(left: 20.0, right: 20.0),
         child: Form(
@@ -141,7 +153,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
                     backgroundColor: HexColor(buttonColor),
                   ),
                   child: const Text(
-                    "Ekle",
+                    "Güncelle",
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ),
@@ -171,7 +183,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
 
       // Kullanıcıya başarı mesajı göster
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('İlaç bilgileri başarıyla eklendi')),
+        const SnackBar(content: Text('İlaç bilgileri başarıyla güncellendi')),
       );
     }
   }

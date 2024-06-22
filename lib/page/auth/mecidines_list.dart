@@ -3,7 +3,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/const/color.dart';
-import 'package:remember_medicine/page/auth/medicines.dart'; // Burada medicines.dart dosyasını import ediyoruz.
+import 'package:remember_medicine/page/auth/emergencyContacts.dart';
+import 'package:remember_medicine/page/auth/home.dart';
+import 'package:remember_medicine/page/auth/login.dart';
+import 'package:remember_medicine/page/auth/medicines.dart';
+import 'package:remember_medicine/page/auth/profile.dart'; // Burada medicines.dart dosyasını import ediyoruz.
 
 class MedicinesListPage extends StatefulWidget {
   const MedicinesListPage({super.key});
@@ -20,9 +24,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
     await databaseReference.child('users').child(userId).child('medicines').child(medicineName).remove();
   }
 
-  Future<void> _updateMedicine(String userId, String medicineName, Map<dynamic, dynamic> medicineData) async {
-    // Bu metodu kullanarak ilaç güncelleme işlemlerini yapabilirsiniz.
-    // İlaç güncelleme için gerekli sayfaya yönlendirme ya da güncelleme işlemini burada tanımlayabilirsiniz.
+  void _updateMedicine(String userId, String medicineName, Map<dynamic, dynamic> medicineData) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -55,7 +57,10 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const MedicinesListPage(),
+              builder: (context) => const MedicinesPage2(
+                medicineName: '', // Yeni ilaç eklemek için boş string gönderebilirsiniz.
+                medicineData: {}, // Yeni ilaç eklemek için boş map gönderebilirsiniz.
+              ),
             ),
           );
         },
@@ -63,6 +68,108 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
       ),
       appBar: AppBar(
         title: const Text('İlaç Listesi'),
+      ),
+       drawer: Drawer(
+        backgroundColor: HexColor(backgroundColor),
+        child: ListView(
+          children: [
+            Center(
+              child: Text(
+                "Menü",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: HexColor(primaryColor),
+                ),
+              ),
+            ),
+            customSizeBox(),
+            ListTile(
+              title: const Text(
+                "Anasayfa",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 53, 49, 49),
+                ),
+              ),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),);
+              },
+            ),
+            ListTile(
+              title: const Text(
+                "İlaç Listesi",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 53, 49, 49),
+                ),
+              ),
+              onTap: () {
+                
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MedicinesListPage()),);
+              },
+            ),
+            customSizeBox(),
+            ListTile(
+              title: const Text(
+                "Raporlar",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 53, 49, 49),
+                ),
+              ),
+              onTap: () {},
+            ),
+            customSizeBox(),
+            ListTile(
+              title: const Text(
+                "Acil Durum",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 53, 49, 49),
+                ),
+              ),
+              onTap: () {
+                  Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => emergency_page()),);
+              },
+            ),
+            customSizeBox(),
+            ListTile(
+              title: const Text(
+                "Profil",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 53, 49, 49),
+                ),
+              ),
+              onTap: () {
+                  Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfilePage()),);
+              },
+            ),
+            customSizeBox(),
+            ListTile(
+              title: const Text(
+                "Çıkış",
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 53, 49, 49),
+                ),
+              ),
+              onTap: () {
+                  Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Login_page()));
+              },
+            ),
+          ],
+        ),
       ),
       body: Container(
         margin: EdgeInsets.only(left: 20.0, right: 20.0),
@@ -86,7 +193,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                   var medicineData = medicines[medicineName];
 
                   // medicineData'nın türünü kontrol et
-                  if (medicineData is String) {
+                  if (medicineData is Map<dynamic, dynamic>) {
                     return Card(
                       elevation: 5.0,
                       margin: EdgeInsets.symmetric(vertical: 10.0),
@@ -106,79 +213,6 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    _updateMedicine(user.uid, medicineName, medicineData as Map);
-                                  },
-                                  child: Icon(Icons.edit),
-                                ),
-                                SizedBox(width: 8.0),
-                                IconButton(
-                                  icon: Icon(Icons.delete),
-                                  onPressed: () async {
-                                    bool? confirmDelete = await showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text('Silmek istediğinize emin misiniz?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(false),
-                                            child: Text('Hayır'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(true),
-                                            child: Text('Evet'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-
-                                    if (confirmDelete == true) {
-                                      _deleteMedicine(user.uid, medicineName);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  } else if (medicineData is Map<dynamic, dynamic>) {
-                    return Card(
-                      elevation: 5.0,
-                      margin: EdgeInsets.symmetric(vertical: 10.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("İlaç Adı: $medicineName"),
-                                ...medicineData['days'].entries.map((entry) {
-                                  String day = entry.key;
-                                  var timeData = entry.value;
-
-                                  // timeData'nın türünü kontrol et ve ona göre işleme yap
-                                  if (timeData is Map<dynamic, dynamic> && timeData.containsKey('times')) {
-                                    String time = timeData['times'];
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                                      child: Text("Günü: $day, Saati: $time"),
-                                    );
-                                  } else {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                                      child: Text("Günü: $day, Saati: Bilinmiyor"),
-                                    );
-                                  }
-                                }).toList(),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
                                     _updateMedicine(user.uid, medicineName, medicineData);
                                   },
                                   child: Icon(Icons.edit),
@@ -203,7 +237,6 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                                         ],
                                       ),
                                     );
-
                                     if (confirmDelete == true) {
                                       _deleteMedicine(user.uid, medicineName);
                                     }
@@ -216,70 +249,19 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                       ),
                     );
                   } else {
-                    return Card(
-                      elevation: 5.0,
-                      margin: EdgeInsets.symmetric(vertical: 10.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("İlaç Adı: $medicineName"),
-                                Text("Bilinmeyen veri formatı"),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    _updateMedicine(user.uid, medicineName, medicineData);
-                                  },
-                                  child: Icon(Icons.edit),
-                                ),
-                                SizedBox(width: 8.0),
-                                IconButton(
-                                  icon: Icon(Icons.delete),
-                                  onPressed: () async {
-                                    bool? confirmDelete = await showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text('Silmek istediğinize emin misiniz?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(false),
-                                            child: Text('Hayır'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(true),
-                                            child: Text('Evet'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-
-                                    if (confirmDelete == true) {
-                                      _deleteMedicine(user.uid, medicineName);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    return SizedBox(); // Boş widget döndür, medicineData beklenen türde değilse
                   }
                 },
               );
-            } else {
-              return Center(child: Text('Kayıtlı ilaç yok'));
             }
+
+            return Center(child: Text('İlaç bulunamadı.'));
           },
         ),
       ),
     );
   }
+  Widget customSizeBox() => SizedBox(
+        height: 20.0,
+      );
 }
