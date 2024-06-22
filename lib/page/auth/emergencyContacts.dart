@@ -10,14 +10,14 @@ import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
 
-class emergency_page extends StatefulWidget {
-  const emergency_page({Key? key}) : super(key: key);
+class EmergencyPage extends StatefulWidget {
+  const EmergencyPage({Key? key}) : super(key: key);
 
   @override
-  State<emergency_page> createState() => _emergency_pageState();
+  State<EmergencyPage> createState() => _EmergencyPageState();
 }
 
-class _emergency_pageState extends State<emergency_page> {
+class _EmergencyPageState extends State<EmergencyPage> {
   late String emergencyName = '';
   late TextEditingController userNameController;
   late TextEditingController userNumberController;
@@ -42,6 +42,8 @@ class _emergency_pageState extends State<emergency_page> {
 
   @override
   Widget build(BuildContext context) {
+    User? user = firebaseAuth.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: HexColor(backgroundColor),
@@ -68,7 +70,7 @@ class _emergency_pageState extends State<emergency_page> {
                 ),
               ),
             ),
-                customSizeBox(),
+            customSizeBox(),
             ListTile(
               title: const Text(
                 "Anasayfa",
@@ -80,7 +82,8 @@ class _emergency_pageState extends State<emergency_page> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),);
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
               },
             ),
             customSizeBox(),
@@ -95,7 +98,8 @@ class _emergency_pageState extends State<emergency_page> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => MedicinesListPage()),);
+                  MaterialPageRoute(builder: (context) => MedicinesListPage()),
+                );
               },
             ),
             customSizeBox(),
@@ -121,7 +125,7 @@ class _emergency_pageState extends State<emergency_page> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => emergency_page()),
+                  MaterialPageRoute(builder: (context) => EmergencyPage()),
                 );
               },
             ),
@@ -137,7 +141,8 @@ class _emergency_pageState extends State<emergency_page> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),);
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
               },
             ),
             customSizeBox(),
@@ -161,42 +166,160 @@ class _emergency_pageState extends State<emergency_page> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            titleText(),
             SizedBox(height: 20),
-            Text(
-              "Kullanıcı Adı",
-              style: TextStyle(fontSize: 20),
-            ),
-            TextFormField(
-              controller: userNameController,
-              decoration: InputDecoration(
-                hintText: "Kullanıcı Adınızı Girin",
-                border: OutlineInputBorder(),
+            Expanded(
+              child: Row(
+                children: [
+                  // Kayıtlı acil durum numaralarını listeleyen kısım
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Kayıtlı Acil Durum Numaraları",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        Expanded(
+                          child: StreamBuilder(
+                            stream: databaseReference.child('users').child(user!.uid).child('emergencies').onValue,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Center(child: CircularProgressIndicator());
+                              }
+
+                              if (snapshot.hasError) {
+                                return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+                              }
+
+                              if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                                Map<dynamic, dynamic> emergencies = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+                                return ListView.builder(
+                                  itemCount: emergencies.length,
+                                  itemBuilder: (context, index) {
+                                    String key = emergencies.keys.elementAt(index);
+                                    var emergency = emergencies[key];
+
+                                    return Card(
+                                      elevation: 5.0,
+                                      margin: EdgeInsets.symmetric(vertical: 10.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text("Adı: ${emergency['emergencyName']}"),
+                                                Text("Numarası: ${emergency['emergencyNumber']}"),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _updateEmergency(user.uid, key, emergency);
+                                                  },
+                                                  child: Icon(Icons.edit),
+                                                ),
+                                                SizedBox(width: 8.0),
+                                                IconButton(
+                                                  icon: Icon(Icons.delete),
+                                                  onPressed: () async {
+                                                    bool? confirmDelete = await showDialog(
+                                                      context: context,
+                                                      builder: (context) => AlertDialog(
+                                                        title: Text('Silmek istediğinize emin misiniz?'),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () => Navigator.of(context).pop(false),
+                                                            child: Text('Hayır'),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () => Navigator.of(context).pop(true),
+                                                            child: Text('Evet'),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                    if (confirmDelete == true) {
+                                                      _deleteEmergency(user.uid, key);
+                                                    }
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+
+                              return Center(child: Text('Kayıtlı acil durum numarası yok.'));
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  VerticalDivider(color: Colors.black),
+                  // Yeni numara ekleme formu
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Yeni Acil Durum Numarası Ekle",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Kullanıcı Adı",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            TextFormField(
+                              controller: userNameController,
+                              decoration: InputDecoration(
+                                hintText: "Kullanıcı Adınızı Girin",
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Text(
+                              "Kullanıcı Numarası",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            TextFormField(
+                              controller: userNumberController,
+                              keyboardType: TextInputType.phone,
+                              decoration: InputDecoration(
+                                hintText: "Kullanıcı Numaranızı Girin",
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                handleSubmit();
+                              },
+                              child: Text("Kaydet"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Kullanıcı Numarası",
-              style: TextStyle(fontSize: 20),
-            ),
-            TextFormField(
-              controller: userNumberController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                hintText: "Kullanıcı Numaranızı Girin",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Formu submit etmek için işlemler
-                handleSubmit();
-              },
-              child: Text("Kaydet"),
             ),
           ],
         ),
@@ -204,57 +327,95 @@ class _emergency_pageState extends State<emergency_page> {
     );
   }
 
-  
-void handleSubmit() {
-  // Kullanıcı adı ve numarasını Firebase'e kaydetme işlemi
-  String emergencyName = userNameController.text.trim();
-  String emergencyNumber = userNumberController.text.trim();
+  void handleSubmit() {
+    String emergencyName = userNameController.text.trim();
+    String emergencyNumber = userNumberController.text.trim();
 
-  // Şu anki kullanıcıyı al
-  User? currentUser = firebaseAuth.currentUser;
-  if (currentUser != null) {
-    // Kullanıcı verilerini 'users' düğümü altında kaydetmek için referans oluştur
-    DatabaseReference userRef = databaseReference.child('users').child(currentUser.uid).child('emergencies').push();
-    
-    // Kullanıcı bilgilerini Firebase'e kaydet
-    userRef.set({
-      'emergencyName': emergencyName,
-      'emergencyNumber': emergencyNumber,
-    }).then((value) {
-      // Başarılı kayıt durumunda kullanıcıyı bilgilendirme
+    User? currentUser = firebaseAuth.currentUser;
+    if (currentUser != null) {
+      DatabaseReference userRef = databaseReference.child('users').child(currentUser.uid).child('emergencies').push();
+
+      userRef.set({
+        'emergencyName': emergencyName,
+        'emergencyNumber': emergencyNumber,
+      }).then((value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Kullanıcı bilgileri başarıyla kaydedildi!"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Kullanıcı bilgileri kaydedilirken hata oluştu: $error"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      });
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Kullanıcı bilgileri başarıyla kaydedildi!"),
+          content: Text("Oturum açan kullanıcı bulunamadı."),
           duration: Duration(seconds: 2),
         ),
       );
-    }).catchError((error) {
-      // Hata durumunda kullanıcıyı bilgilendirme
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Kullanıcı bilgileri kaydedilirken hata oluştu: $error"),
-          duration: Duration(seconds: 2),
+    }
+  }
+
+  void _updateEmergency(String userId, String key, dynamic emergency) {
+    userNameController.text = emergency['emergencyName'];
+    userNumberController.text = emergency['emergencyNumber'];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Acil Durum Bilgilerini Güncelle'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: userNameController,
+              decoration: InputDecoration(labelText: 'Kullanıcı Adı'),
+            ),
+            TextFormField(
+              controller: userNumberController,
+              decoration: InputDecoration(labelText: 'Kullanıcı Numarası'),
+            ),
+          ],
         ),
-      );
-    });
-  } else {
-    // Kullanıcı oturumu açık değilse uyarı ver
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Oturum açan kullanıcı bulunamadı."),
-        duration: Duration(seconds: 2),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () {
+              databaseReference.child('users').child(userId).child('emergencies').child(key).set({
+                'emergencyName': userNameController.text,
+                'emergencyNumber': userNumberController.text,
+              }).then((_) {
+                Navigator.of(context).pop();
+              });
+            },
+            child: Text('Güncelle'),
+          ),
+        ],
       ),
     );
   }
-}
+
+  void _deleteEmergency(String userId, String key) {
+    databaseReference.child('users').child(userId).child('emergencies').child(key).remove();
+  }
 
   Text titleText() {
     return Text(
-      " Acil durum aramaları  ",
+      "Acil Durum Aramaları",
       style: TextStyle(
         fontSize: 30,
         fontWeight: FontWeight.bold,
-        color: HexColor('#3F51B5'), // replace with your primaryColor
+        color: HexColor('#3F51B5'),
       ),
     );
   }
@@ -263,4 +424,3 @@ void handleSubmit() {
         height: 20.0,
       );
 }
-

@@ -135,7 +135,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
               onTap: () {
                   Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => emergency_page()),);
+                  MaterialPageRoute(builder: (context) => EmergencyPage()),);
               },
             ),
             customSizeBox(),
