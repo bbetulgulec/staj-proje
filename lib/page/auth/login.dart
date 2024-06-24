@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -186,6 +187,9 @@ class _LoginPageState extends State<Login_page> {
           if (formKey.currentState!.validate()) {
             formKey.currentState!.save();
             try {
+              if(kIsWeb){
+                 await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+              }
               UserCredential userCredential = await FirebaseAuth.instance
                   .signInWithEmailAndPassword(email: email, password: password);
               if (userCredential.user != null) {

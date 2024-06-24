@@ -7,6 +7,7 @@ import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -88,6 +89,17 @@ class _HomePageState extends State<HomePage> {
         print('Failed to fetch user data: $error');
       });
     }
+  }
+
+  Future<void> signOut(BuildContext context)async{
+    await FirebaseAuth.instance.signOut();
+
+    SharedPreferences prefs= await SharedPreferences.getInstance();
+    await prefs.clear();
+
+     Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Login_page()));
   }
 
   @override
@@ -199,9 +211,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onTap: () {
-                  Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Login_page()));
+                 signOut(context);
               },
             ),
           ],

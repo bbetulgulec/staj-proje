@@ -8,7 +8,7 @@ class MedicinesPage2 extends StatefulWidget {
   final String medicineName;
   final Map<dynamic, dynamic> medicineData;
 
-  const MedicinesPage2({super.key, required this.medicineName, required this.medicineData});
+  const MedicinesPage2({Key? key, required this.medicineName, required this.medicineData}) : super(key: key);
 
   @override
   State<MedicinesPage2> createState() => _MedicinesPage2State();
@@ -16,31 +16,23 @@ class MedicinesPage2 extends StatefulWidget {
 
 class _MedicinesPage2State extends State<MedicinesPage2> {
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController daysController = TextEditingController();
-  final TextEditingController timesController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
-  final firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
 
   String selectedDay = '';
   String selectedTime = '';
 
   final List<String> days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-  final Map<String, List<String>> hours = {
-    'Pazartesi': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-    'Salı': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-    'Çarşamba': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-    'Perşembe': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-    'Cuma': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-    'Cumartesi': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-    'Pazar': ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
-  };
+  final List<String> hours = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
 
   @override
   void initState() {
     super.initState();
     nameController.text = widget.medicineName;
+    selectedDay = getFirstDayFromMedicineData();
+    selectedTime = getFirstTimeFromMedicineData();
   }
 
   @override
@@ -78,7 +70,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
               ),
               customSizeBox(),
               const Text(
-                "Hangi günler kullanacaksın:",
+                "Hangi gün kullanacaksın:",
                 style: TextStyle(
                   fontSize: 30,
                 ),
@@ -93,7 +85,6 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
                   onChanged: (newValue) {
                     setState(() {
                       selectedDay = newValue!;
-                      selectedTime = ''; // Gün değiştiğinde saat seçimlerini temizle
                     });
                   },
                   items: days.map((day) {
@@ -108,41 +99,38 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
                   ),
                 ),
               ),
-              if (selectedDay.isNotEmpty) ...[
-                SizedBox(height: 10), // Arada bir boşluk ekleyebiliriz
-                Text(
-                  "Hangi saatler kullanacaksın :",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18.0,
+              customSizeBox(),
+              const Text(
+                "Hangi saatte kullanacaksın:",
+                style: TextStyle(
+                  fontSize: 30,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: DropdownButtonFormField<String>(
+                  value: selectedTime.isEmpty ? null : selectedTime,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedTime = newValue!;
+                    });
+                  },
+                  items: hours.map((time) {
+                    return DropdownMenuItem(
+                      value: time,
+                      child: Text(time),
+                    );
+                  }).toList(),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Saat seçiniz",
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedTime.isEmpty ? null : selectedTime,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedTime = newValue!;
-                      });
-                    },
-                    items: hours[selectedDay]!.map((time) {
-                      return DropdownMenuItem(
-                        value: time,
-                        child: Text(time),
-                      );
-                    }).toList(),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Saat seçiniz",
-                    ),
-                  ),
-                ),
-              ],
-              SizedBox(height: 20), // Araya boşluk ekleyebiliriz
+              ),
+              customSizeBox(),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -158,7 +146,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
                   ),
                 ),
               ),
-              SizedBox(height: 20), // Araya biraz boşluk daha ekleyelim
+              SizedBox(height: 20),
             ],
           ),
         ),
@@ -177,14 +165,60 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
           .child('medicines')
           .child(nameController.text);
 
-      // Seçilen gün ve saat için verileri eklemek
-      final dayRef = medicineRef.child('days').child(selectedDay);
-      await dayRef.child('times').set(selectedTime);
+      DatabaseEvent event = await medicineRef.once();
 
-      // Kullanıcıya başarı mesajı göster
+      Map<String, dynamic> medicineData = {};
+      if (event.snapshot.value != null) {
+        medicineData = Map<String, dynamic>.from(event.snapshot.value as Map<dynamic, dynamic>);
+      }
+
+      // Mevcut gün ve saatleri sil
+      if (medicineData.containsKey('days') && (medicineData['days'] as Map).containsKey(selectedDay)) {
+        (medicineData['days'] as Map).remove(selectedDay);
+      }
+
+      // Yeni gün ve saatleri ekle
+      DateTime now = DateTime.now();
+      Map<String, String> monthDates = {};
+      for (int i = 0; i < 30; i++) {
+        DateTime date = now.add(Duration(days: i));
+        if (date.weekday == days.indexOf(selectedDay) + 1) {
+          String dateString = '${date.year}-${date.month}-${date.day}';
+          monthDates[dateString] = selectedTime;
+        }
+      }
+
+      medicineData['days'] ??= {};
+      (medicineData['days'] as Map)[selectedDay] = monthDates;
+
+      await medicineRef.set(medicineData);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('İlaç bilgileri başarıyla güncellendi')),
       );
+
+      Navigator.pop(context);
+
+      setState(() {
+        selectedDay = getFirstDayFromMedicineData();
+        selectedTime = getFirstTimeFromMedicineData();
+      });
     }
+  }
+
+  String getFirstDayFromMedicineData() {
+    if (widget.medicineData.containsKey('days') && (widget.medicineData['days'] as Map).isNotEmpty) {
+      return (widget.medicineData['days'] as Map).keys.first;
+    }
+    return '';
+  }
+
+  String getFirstTimeFromMedicineData() {
+    if (widget.medicineData.containsKey('days') &&
+        (widget.medicineData['days'] as Map).containsKey(selectedDay) &&
+        (widget.medicineData['days'][selectedDay] as Map).isNotEmpty) {
+      return (widget.medicineData['days'][selectedDay] as Map).values.first;
+    }
+    return '';
   }
 }

@@ -7,7 +7,7 @@ import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/medicines.dart';
-import 'package:remember_medicine/page/auth/profile.dart'; // Burada medicines.dart dosyasını import ediyoruz.
+import 'package:remember_medicine/page/auth/profile.dart';
 
 class MedicinesListPage extends StatefulWidget {
   const MedicinesListPage({super.key});
@@ -33,14 +33,15 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           medicineData: medicineData,
         ),
       ),
-    );
+    ).then((_) {
+      setState(() {}); // Güncelleme sonrası sayfayı yenile
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     User? user = firebaseAuth.currentUser;
     if (user == null) {
-      // Kullanıcı oturum açmamışsa bir bildirim gösterilebilir
       return Scaffold(
         appBar: AppBar(
           title: const Text('İlaç Listesi'),
@@ -57,19 +58,21 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const MedicinesPage2(
-                medicineName: '', // Yeni ilaç eklemek için boş string gönderebilirsiniz.
-                medicineData: {}, // Yeni ilaç eklemek için boş map gönderebilirsiniz.
+              builder: (context) => MedicinesPage2(
+                medicineName: '',
+                medicineData: {},
               ),
             ),
-          );
+          ).then((_) {
+            setState(() {}); // Yeni ilaç eklendikten sonra sayfayı yenile
+          });
         },
         child: Icon(Icons.add),
       ),
       appBar: AppBar(
         title: const Text('İlaç Listesi'),
       ),
-       drawer: Drawer(
+      drawer: Drawer(
         backgroundColor: HexColor(backgroundColor),
         child: ListView(
           children: [
@@ -94,7 +97,8 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),);
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
               },
             ),
             ListTile(
@@ -106,10 +110,10 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                 ),
               ),
               onTap: () {
-                
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => MedicinesListPage()),);
+                  MaterialPageRoute(builder: (context) => MedicinesListPage()),
+                );
               },
             ),
             customSizeBox(),
@@ -133,9 +137,10 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                 ),
               ),
               onTap: () {
-                  Navigator.pushReplacement(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => EmergencyPage()),);
+                  MaterialPageRoute(builder: (context) => EmergencyPage()),
+                );
               },
             ),
             customSizeBox(),
@@ -148,9 +153,10 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                 ),
               ),
               onTap: () {
-                  Navigator.pushReplacement(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),);
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
               },
             ),
             customSizeBox(),
@@ -163,9 +169,10 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                 ),
               ),
               onTap: () {
-                  Navigator.pushReplacement(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => Login_page()));
+                  MaterialPageRoute(builder: (context) => Login_page()),
+                );
               },
             ),
           ],
@@ -194,6 +201,20 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
 
                   // medicineData'nın türünü kontrol et
                   if (medicineData is Map<dynamic, dynamic>) {
+                    List<String> days = [];
+                    List<String> times = [];
+
+                    if (medicineData['days'] != null) {
+                      (medicineData['days'] as Map).forEach((day, value) {
+                        days.add(day);
+                        if (value is Map) {
+                          value.forEach((date, time) {
+                            if (!times.contains(time)) times.add(time);
+                          });
+                        }
+                      });
+                    }
+
                     return Card(
                       elevation: 5.0,
                       margin: EdgeInsets.symmetric(vertical: 10.0),
@@ -206,7 +227,8 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("İlaç Adı: $medicineName"),
-                                Text("Bilgiler: $medicineData"),
+                                if (days.isNotEmpty) Text("Gün: ${days.first}"),
+                                if (times.isNotEmpty) Text("Saat: ${times.first}"),
                               ],
                             ),
                             Row(
@@ -261,7 +283,6 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
       ),
     );
   }
-  Widget customSizeBox() => SizedBox(
-        height: 20.0,
-      );
+
+  Widget customSizeBox() => SizedBox(height: 20.0);
 }

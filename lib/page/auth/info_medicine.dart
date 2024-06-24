@@ -448,10 +448,42 @@ SingleChildScrollView animatedContainerMedicine() {
           .child('medicines')
           .child(medicineName);
 
-      // Seçilen gün ve saat için verileri eklemek
-      final dayRef = medicineRef.child('days').child(selectedDay);
-      await dayRef.child('times').set(selectedTime);
+      DateTime startDate = DateTime.now();
+      DateTime endDate = startDate.add(Duration(days: 30));
+
+      while (startDate.isBefore(endDate)) {
+        if (startDate.weekday == getDayIndex(selectedDay)) {
+          final dayRef = medicineRef.child('days').child(formatDate(startDate));
+          await dayRef.child('times').set(selectedTime);
+        }
+        startDate = startDate.add(Duration(days: 1));
+      }
     }
+  }
+
+  int getDayIndex(String day) {
+    switch (day) {
+      case 'Pazartesi':
+        return DateTime.monday;
+      case 'Salı':
+        return DateTime.tuesday;
+      case 'Çarşamba':
+        return DateTime.wednesday;
+      case 'Perşembe':
+        return DateTime.thursday;
+      case 'Cuma':
+        return DateTime.friday;
+      case 'Cumartesi':
+        return DateTime.saturday;
+      case 'Pazar':
+        return DateTime.sunday;
+      default:
+        return DateTime.monday;
+    }
+  }
+
+  String formatDate(DateTime date) {
+    return "${date.day}-${date.month}-${date.year}";
   }
 
   void saveAllergy() async {
@@ -475,6 +507,3 @@ SingleChildScrollView animatedContainerMedicine() {
       
     }
   }
-  
-  
-
