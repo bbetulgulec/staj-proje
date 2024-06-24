@@ -1,14 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/page/auth/account.dart';
 import 'package:remember_medicine/const/color.dart';
-import "package:email_validator/email_validator.dart";
+import 'package:email_validator/email_validator.dart';
+import 'package:remember_medicine/page/auth/forgot_password.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 
 class Login_page extends StatefulWidget {
@@ -109,6 +106,8 @@ class _LoginPageState extends State<Login_page> {
       validator: (value) {
         if (value!.isEmpty) {
           return "Bir e-posta adresi giriniz ";
+        } else if (!EmailValidator.validate(value)) {
+          return "Geçerli bir e-posta adresi giriniz";
         } else {
           return null;
         }
@@ -133,6 +132,7 @@ class _LoginPageState extends State<Login_page> {
       onSaved: (value) {
         password = value!;
       },
+      obscureText: true,
       decoration: costumInputDecaretion("şifre "),
     );
   }
@@ -140,7 +140,10 @@ class _LoginPageState extends State<Login_page> {
   Center forgotPasswordButton() {
     return Center(
         child: TextButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => ForgotPassword()));
+      },
       child: Text(
         "Şifremi Unuttum",
         style: TextStyle(
@@ -187,12 +190,23 @@ class _LoginPageState extends State<Login_page> {
           if (formKey.currentState!.validate()) {
             formKey.currentState!.save();
             try {
-              if(kIsWeb){
-                 await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+              if (kIsWeb) {
+                await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
               }
               UserCredential userCredential = await FirebaseAuth.instance
                   .signInWithEmailAndPassword(email: email, password: password);
-              if (userCredential.user != null) {
+
+              User? user = userCredential.user;
+
+              if (user != null && !user.emailVerified) {
+                await user.sendEmailVerification();
+                await FirebaseAuth.instance.signOut();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('E-posta adresiniz doğrulanmamış. Lütfen e-postanızı kontrol edin.'),
+                  ),
+                );
+              } else if (user != null && user.emailVerified) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => HomePage()),
@@ -239,6 +253,7 @@ class _LoginPageState extends State<Login_page> {
   Widget customSizeBox() => SizedBox(
         height: 20.0,
       );
+
   InputDecoration costumInputDecaretion(String hintText) {
     return InputDecoration(
       hintText: hintText,
