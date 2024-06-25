@@ -2,13 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/const/color.dart';
 import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
+import 'package:remember_medicine/page/auth/reports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,13 +23,16 @@ class _HomePageState extends State<HomePage> {
   late DatabaseReference userRef;
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
   String userName = '';
-  List<Map<String, String>> todayMedicines = []; // Bugünün ilaçları
+  List<Map<String, String>> todayMedicines = [];
+  Set<String> usedMedicines = {};
+  int todayMedicinesCount = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchUserName();
     fetchTodayMedicines();
+    fetchUsedMedicines();
   }
 
   void fetchTodayMedicines() async {
@@ -74,6 +77,7 @@ class _HomePageState extends State<HomePage> {
 
         setState(() {
           todayMedicines = medicinesForToday;
+          todayMedicinesCount = medicinesForToday.length; // Günlük ilaç sayısını güncelle
         });
       } catch (error) {
         print('İlaç verileri getirilirken hata oluştu: $error');
@@ -101,14 +105,34 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> signOut(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
+  Future<void> fetchUsedMedicines() async {
+    User? currentUser = mAuth.currentUser;
+    if (currentUser != null) {
+      DateTime now = DateTime.now();
+      String todayString = '${now.year}-${now.month}-${now.day}';
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+      DatabaseReference usedMedicinesRef = databaseReference
+          .child('users')
+          .child(currentUser.uid)
+          .child('todayOfUsedMedicine')
+          .child(todayString);
 
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const Login_page()));
+      DatabaseEvent event = await usedMedicinesRef.once();
+      DataSnapshot snapshot = event.snapshot;
+
+      if (snapshot.value != null && snapshot.value is Map) {
+        Map<dynamic, dynamic> usedMedicinesData = snapshot.value as Map<dynamic, dynamic>;
+        Set<String> usedMedicinesSet = Set<String>();
+
+        usedMedicinesData.forEach((medicineName, medicineDetails) {
+          usedMedicinesSet.add(medicineName);
+        });
+
+        setState(() {
+          usedMedicines = usedMedicinesSet;
+        });
+      }
+    }
   }
 
   Future<void> saveUsedMedicines(String medicineName, String medicineTime) async {
@@ -127,7 +151,21 @@ class _HomePageState extends State<HomePage> {
       await usedMedicineRef.set({
         'time': medicineTime,
       });
+
+      setState(() {
+        usedMedicines.add(medicineName);
+      });
     }
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Login_page()));
   }
 
   @override
@@ -198,7 +236,12 @@ class _HomePageState extends State<HomePage> {
                   color: Color.fromARGB(255, 53, 49, 49),
                 ),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ReportsPage()),
+                );
+              },
             ),
             customSizeBox(),
             ListTile(
@@ -287,22 +330,41 @@ class _HomePageState extends State<HomePage> {
                   child: ListView.builder(
                     itemCount: todayMedicines.length,
                     itemBuilder: (context, index) {
+                      String medicineName = todayMedicines[index]['name']!;
+                      bool isUsed = usedMedicines.contains(medicineName);
                       return Card(
                         child: ListTile(
-                          title: Text(todayMedicines[index]['name']!),
+                          title: Text(medicineName),
                           subtitle: Text('Saat: ${todayMedicines[index]['time']}'),
-                          trailing: IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              saveUsedMedicines(
-                                todayMedicines[index]['name']!,
-                                todayMedicines[index]['time']!,
-                              );
-                            },
-                          ),
+                          trailing: isUsed
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.check, color: Colors.green),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'İlaç kullanıldı',
+                                      style: TextStyle(color: Colors.green),
+                                    ),
+                                  ],
+                                )
+                              : IconButton(
+                                  icon: Icon(Icons.add),
+                                  onPressed: () {
+                                    saveUsedMedicines(medicineName, todayMedicines[index]['time']!);
+                                  },
+                                ),
                         ),
                       );
                     },
+                  ),
+                ),
+                SizedBox(height: 20.0), // Araya boşluk ekliyoruz
+                Text(
+                  "Toplam İlaç Sayısı: $todayMedicinesCount",
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: HexColor(primaryColor),
                   ),
                 ),
               ],
@@ -313,7 +375,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget customSizeBox() => SizedBox(
+  Widget customSizeBox() => const SizedBox(
         height: 20.0,
       );
 }
