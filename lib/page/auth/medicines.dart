@@ -172,9 +172,9 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
         medicineData = Map<String, dynamic>.from(event.snapshot.value as Map<dynamic, dynamic>);
       }
 
-      // Mevcut gün ve saatleri sil
-      if (medicineData.containsKey('days') && (medicineData['days'] as Map).containsKey(selectedDay)) {
-        (medicineData['days'] as Map).remove(selectedDay);
+      // Mevcut gün ve saatleri sil (DEĞİŞTİRİLDİ)
+      if (medicineData.containsKey('days')) {
+        (medicineData['days'] as Map).removeWhere((key, value) => true);
       }
 
       // Yeni gün ve saatleri ekle

@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/const/color.dart';
 import 'package:remember_medicine/page/auth/emergencyContacts.dart';
@@ -19,16 +21,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth mAuth = FirebaseAuth.instance;
   late DatabaseReference userRef;
+  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
   String userName = '';
-  String medicationsText = ''; // ilaçları text olarak tutmak için
+  List<Map<String, String>> todayMedicines = []; // Bugünün ilaçları
 
   @override
   void initState() {
     super.initState();
     _fetchUserName();
-    fetchMedications();
+    fetchTodayMedicines();
   }
-  void fetchMedications() async {
+
+  void fetchTodayMedicines() async {
     User? currentUser = mAuth.currentUser;
     if (currentUser != null) {
       DatabaseReference medicationRef = FirebaseDatabase.instance
@@ -41,29 +45,35 @@ class _HomePageState extends State<HomePage> {
         DatabaseEvent event = await medicationRef.once();
         DataSnapshot snapshot = event.snapshot;
 
-        setState(() {
-          medicationsText = ''; // Önceki verileri temizle
+        DateTime now = DateTime.now();
+        String todayString = '${now.year}-${now.month}-${now.day}';
 
-          if (snapshot.value != null && snapshot.value is Map) {
-            Map<dynamic, dynamic> medicinesData = snapshot.value as Map<dynamic, dynamic>;
+        List<Map<String, String>> medicinesForToday = [];
 
-            medicinesData.forEach((medicineName, medicineDetails) {
-              if (medicineDetails is Map && medicineDetails['days'] is Map) {
-                Map<dynamic, dynamic> daysData = medicineDetails['days'] as Map<dynamic, dynamic>;
+        if (snapshot.value != null && snapshot.value is Map) {
+          Map<dynamic, dynamic> medicinesData = snapshot.value as Map<dynamic, dynamic>;
 
-                daysData.forEach((day, timesDetails) {
-                  if (timesDetails is Map && timesDetails['times'] is List) {
-                    List<dynamic> timesList = timesDetails['times'] as List<dynamic>;
+          medicinesData.forEach((medicineName, medicineDetails) {
+            if (medicineDetails is Map && medicineDetails['days'] is Map) {
+              Map<dynamic, dynamic> daysData = medicineDetails['days'] as Map<dynamic, dynamic>;
 
-                    timesList.forEach((time) {
-                      // İlaç adı, gün ve saatleri birleştirerek text olarak ekle
-                      medicationsText += '$medicineName - $day: $time\n';
+              daysData.forEach((day, dates) {
+                if (dates is Map) {
+                  Map<String, String> datesMap = Map<String, String>.from(dates);
+                  if (datesMap.containsKey(todayString)) {
+                    medicinesForToday.add({
+                      'name': medicineName,
+                      'time': datesMap[todayString]!,
                     });
                   }
-                });
-              }
-            });
-          }
+                }
+              });
+            }
+          });
+        }
+
+        setState(() {
+          todayMedicines = medicinesForToday;
         });
       } catch (error) {
         print('İlaç verileri getirilirken hata oluştu: $error');
@@ -91,15 +101,33 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> signOut(BuildContext context)async{
+  Future<void> signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
 
-    SharedPreferences prefs= await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
-     Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const Login_page()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Login_page()));
+  }
+
+  Future<void> saveUsedMedicines(String medicineName, String medicineTime) async {
+    User? user = mAuth.currentUser;
+    if (user != null) {
+      DateTime now = DateTime.now();
+      String todayString = '${now.year}-${now.month}-${now.day}';
+
+      final usedMedicineRef = databaseReference
+          .child('users')
+          .child(user.uid)
+          .child('todayOfUsedMedicine')
+          .child(todayString)
+          .child(medicineName);
+
+      await usedMedicineRef.set({
+        'time': medicineTime,
+      });
+    }
   }
 
   @override
@@ -142,7 +170,8 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),);
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
               },
             ),
             ListTile(
@@ -154,10 +183,10 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onTap: () {
-                
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => MedicinesListPage()),);
+                  MaterialPageRoute(builder: (context) => MedicinesListPage()),
+                );
               },
             ),
             customSizeBox(),
@@ -181,9 +210,10 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onTap: () {
-                  Navigator.pushReplacement(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => EmergencyPage()),);
+                  MaterialPageRoute(builder: (context) => EmergencyPage()),
+                );
               },
             ),
             customSizeBox(),
@@ -196,9 +226,10 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onTap: () {
-                  Navigator.pushReplacement(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),);
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
               },
             ),
             customSizeBox(),
@@ -211,7 +242,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onTap: () {
-                 signOut(context);
+                signOut(context);
               },
             ),
           ],
@@ -252,11 +283,26 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 customSizeBox(),
-                Text(
-                   "merhaba ${medicationsText}",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: HexColor(primaryColor),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: todayMedicines.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        child: ListTile(
+                          title: Text(todayMedicines[index]['name']!),
+                          subtitle: Text('Saat: ${todayMedicines[index]['time']}'),
+                          trailing: IconButton(
+                            icon: Icon(Icons.add),
+                            onPressed: () {
+                              saveUsedMedicines(
+                                todayMedicines[index]['name']!,
+                                todayMedicines[index]['time']!,
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
