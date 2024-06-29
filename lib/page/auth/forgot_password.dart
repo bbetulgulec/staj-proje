@@ -25,16 +25,19 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Şifre yenileme gönderilecek e-posta giriniz",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              "Şifre yenileme gönderilecek e-postayı giriniz",
+              style: TextStyle(fontSize: 18, ),
             ),
             SizedBox(height: 20),
             Form(
               key: formKey,
               child: Column(
                 children: [
-                  emailTextField(),
-                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30.0,right: 30.0),
+                    child: emailTextField(),
+                  ),
+                  SizedBox(height: 50),
                   sendEmailButton(),
                 ],
               ),
@@ -53,10 +56,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           await sendPasswordResetLink(emailController.text);
         }
       },
-      child: Text("Gönder"),
+      child: Text("Şifre Yenile !", style: TextStyle(
+        fontSize: 20,
+        color: HexColor(ButtonText),
+      ),),
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: HexColor(buttonColor2),
+        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20)),
       ),
     );
   }
@@ -83,10 +91,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       hintText: hintText,
       hintStyle: TextStyle(color: Colors.grey, fontSize: 20),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(backgroundColor)),
+        borderSide: BorderSide(color: HexColor(textfieldColor)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(buttonColor)),
+        borderSide: BorderSide(color: HexColor(textfieldColor)),
       ),
     );
   }

@@ -16,13 +16,14 @@ class MedicinesPage2 extends StatefulWidget {
 
 class _MedicinesPage2State extends State<MedicinesPage2> {
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController timesController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
 
   String selectedDay = '';
-  String selectedTime = '';
+  List<String> selectedTimes = [];
 
   final List<String> days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
   final List<String> hours = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
@@ -32,14 +33,14 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
     super.initState();
     nameController.text = widget.medicineName;
     selectedDay = getFirstDayFromMedicineData();
-    selectedTime = getFirstTimeFromMedicineData();
+    selectedTimes = getFirstTimesFromMedicineData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('İlaç Güncelle'),
+        title: Text('İlaç Güncelle', style: TextStyle(color: Color.fromARGB(255, 58, 57, 57))),
       ),
       body: Container(
         margin: const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -52,6 +53,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
               const Text(
                 "Adı :",
                 style: TextStyle(
+                  color: Color.fromARGB(255, 58, 57, 57),
                   fontSize: 30,
                 ),
               ),
@@ -72,6 +74,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
               const Text(
                 "Hangi gün kullanacaksın:",
                 style: TextStyle(
+                  color: Color.fromARGB(255, 58, 57, 57),
                   fontSize: 30,
                 ),
               ),
@@ -101,8 +104,9 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
               ),
               customSizeBox(),
               const Text(
-                "Hangi saatte kullanacaksın:",
+                "Günde kaç defa alacaksın :",
                 style: TextStyle(
+                  color: Color.fromARGB(255, 58, 57, 57),
                   fontSize: 30,
                 ),
               ),
@@ -111,25 +115,52 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
                   border: Border.all(),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: DropdownButtonFormField<String>(
-                  value: selectedTime.isEmpty ? null : selectedTime,
-                  onChanged: (newValue) {
+                child: TextFormField(
+                  controller: timesController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
                     setState(() {
-                      selectedTime = newValue!;
+                      int times = int.tryParse(value) ?? 0;
+                      selectedTimes = List.generate(times, (index) => '');
                     });
                   },
-                  items: hours.map((time) {
-                    return DropdownMenuItem(
-                      value: time,
-                      child: Text(time),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Saat seçiniz",
-                  ),
+                  decoration: const InputDecoration(border: InputBorder.none),
                 ),
               ),
+              customSizeBox(),
+              const Text(
+                "Hangi saatlerde kullanacaksın:",
+                style: TextStyle(
+                  fontSize: 30,
+                ),
+              ),
+              ...List.generate(selectedTimes.length, (index) {
+                return Container(
+                  margin: EdgeInsets.only(top: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: DropdownButtonFormField<String>(
+                    value: selectedTimes[index].isEmpty ? null : selectedTimes[index],
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedTimes[index] = newValue!;
+                      });
+                    },
+                    items: hours.map((time) {
+                      return DropdownMenuItem(
+                        value: time,
+                        child: Text(time),
+                      );
+                    }).toList(),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Saat seçiniz",
+                    ),
+                  ),
+                );
+              }),
               customSizeBox(),
               Center(
                 child: ElevatedButton(
@@ -155,56 +186,40 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
   }
 
   Widget customSizeBox() => const SizedBox(height: 20.0);
+void saveMedicine() async {
+  User? user = firebaseAuth.currentUser;
+  if (user != null) {
+    final newMedicineRef = databaseReference
+        .child('users')
+        .child(user.uid)
+        .child('medicines')
+        .child(nameController.text);
 
-  void saveMedicine() async {
-    User? user = firebaseAuth.currentUser;
-    if (user != null) {
-      final medicineRef = databaseReference
-          .child('users')
-          .child(user.uid)
-          .child('medicines')
-          .child(nameController.text);
+    // Yeni ilaç verisini hazırla
+    Map<String, dynamic> medicineData = Map<String, dynamic>.from(widget.medicineData);
+    medicineData['days'] ??= {};
 
-      DatabaseEvent event = await medicineRef.once();
-
-      Map<String, dynamic> medicineData = {};
-      if (event.snapshot.value != null) {
-        medicineData = Map<String, dynamic>.from(event.snapshot.value as Map<dynamic, dynamic>);
+    DateTime now = DateTime.now();
+    Map<String, List<String>> monthDates = {};
+    for (int i = 0; i < 30; i++) {
+      DateTime date = now.add(Duration(days: i));
+      if (date.weekday == days.indexOf(selectedDay) + 1) {
+        String dateString = '${date.year}-${date.month}-${date.day}';
+        monthDates[dateString] = selectedTimes;
       }
-
-      // Mevcut gün ve saatleri sil (DEĞİŞTİRİLDİ)
-      if (medicineData.containsKey('days')) {
-        (medicineData['days'] as Map).removeWhere((key, value) => true);
-      }
-
-      // Yeni gün ve saatleri ekle
-      DateTime now = DateTime.now();
-      Map<String, String> monthDates = {};
-      for (int i = 0; i < 30; i++) {
-        DateTime date = now.add(Duration(days: i));
-        if (date.weekday == days.indexOf(selectedDay) + 1) {
-          String dateString = '${date.year}-${date.month}-${date.day}';
-          monthDates[dateString] = selectedTime;
-        }
-      }
-
-      medicineData['days'] ??= {};
-      (medicineData['days'] as Map)[selectedDay] = monthDates;
-
-      await medicineRef.set(medicineData);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('İlaç bilgileri başarıyla güncellendi')),
-      );
-
-      Navigator.pop(context);
-
-      setState(() {
-        selectedDay = getFirstDayFromMedicineData();
-        selectedTime = getFirstTimeFromMedicineData();
-      });
     }
+    (medicineData['days'] as Map)[selectedDay] = monthDates;
+
+    // Yeni ilaç verisini güncelle veya ekle
+    await newMedicineRef.set(medicineData);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('İlaç bilgileri başarıyla güncellendi')),
+    );
+
+    Navigator.pop(context, {'name': nameController.text, 'data': medicineData});
   }
+}
 
   String getFirstDayFromMedicineData() {
     if (widget.medicineData.containsKey('days') && (widget.medicineData['days'] as Map).isNotEmpty) {
@@ -213,12 +228,12 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
     return '';
   }
 
-  String getFirstTimeFromMedicineData() {
+  List<String> getFirstTimesFromMedicineData() {
     if (widget.medicineData.containsKey('days') &&
         (widget.medicineData['days'] as Map).containsKey(selectedDay) &&
         (widget.medicineData['days'][selectedDay] as Map).isNotEmpty) {
-      return (widget.medicineData['days'][selectedDay] as Map).values.first;
+      return (widget.medicineData['days'][selectedDay] as Map).values.first.cast<String>().toList();
     }
-    return '';
+    return [];
   }
 }

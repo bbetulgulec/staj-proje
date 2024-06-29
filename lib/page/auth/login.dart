@@ -18,6 +18,7 @@ class Login_page extends StatefulWidget {
 class _LoginPageState extends State<Login_page> {
   late String email, password;
   final formKey = GlobalKey<FormState>();
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _LoginPageState extends State<Login_page> {
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: height * .25,
+            height: height * .19,
             decoration: BoxDecoration(
                 image: DecorationImage(
               fit: BoxFit.cover,
@@ -55,7 +56,7 @@ class _LoginPageState extends State<Login_page> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: height * .25,
+              height: height * .19,
               decoration: BoxDecoration(
                   image: DecorationImage(
                 fit: BoxFit.cover,
@@ -69,17 +70,18 @@ class _LoginPageState extends State<Login_page> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    customSizeBox(),
                     titleText(),
                     customSizeBox(),
                     mailtextfield(),
                     customSizeBox(),
                     passwordtextfield(),
+                    forgotPasswordButton(),
                     customSizeBox(),
                     signInButton(),
                     customSizeBox(),
                     createAccountButton(),
                     customSizeBox(),
-                    forgotPasswordButton(),
                   ],
                 ),
               ),
@@ -90,69 +92,121 @@ class _LoginPageState extends State<Login_page> {
     );
   }
 
-  Text titleText() {
-    return Text(
-      "GİRİŞ YAP ",
-      style: TextStyle(
-        fontSize: 50,
-        fontWeight: FontWeight.bold,
-        color: HexColor(primaryColor),
-      ),
-    );
-  }
-
-  TextFormField mailtextfield() {
-    return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Bir e-posta adresi giriniz ";
-        } else if (!EmailValidator.validate(value)) {
-          return "Geçerli bir e-posta adresi giriniz";
-        } else {
-          return null;
-        }
-      },
-      onSaved: (value) {
-        email = value!;
-      },
-      style: TextStyle(color: Colors.black),
-      decoration: costumInputDecaretion("E-Mail "),
-    );
-  }
-
-  TextFormField passwordtextfield() {
-    return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Şifrenizi giriniz ";
-        } else {
-          return null;
-        }
-      },
-      onSaved: (value) {
-        password = value!;
-      },
-      obscureText: true,
-      decoration: costumInputDecaretion("şifre "),
-    );
-  }
-
-  Center forgotPasswordButton() {
-    return Center(
-        child: TextButton(
-      onPressed: () {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => ForgotPassword()));
-      },
+  Widget titleText() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20.0),
       child: Text(
-        "Şifremi Unuttum",
+        "GİRİŞ YAP ",
         style: TextStyle(
+          fontSize: 40,
+          fontWeight: FontWeight.bold,
           color: HexColor(primaryColor),
-          fontSize: 30,
-          fontStyle: FontStyle.italic,
         ),
       ),
-    ));
+    );
+  }
+
+  Widget mailtextfield() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 20.0,left: 20.0),
+      child: TextFormField(
+        validator: (value) {
+          if (value!.isEmpty) {
+            return "Bir e-posta adresi giriniz ";
+          } else if (!EmailValidator.validate(value)) {
+            return "Geçerli bir e-posta adresi giriniz";
+          } else {
+            return null;
+          }
+        },
+        onSaved: (value) {
+          email = value!;
+        },
+        style: TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+        prefixIcon: Icon(Icons.person),
+        hintText: "E-Mail",
+        hintStyle: TextStyle(
+          color: Colors.grey,
+          fontSize: 25,
+        ),
+        enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: HexColor(textfieldColor),
+        )),
+        focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: HexColor(textfieldColor))),
+        )
+      ),
+    );
+  }
+
+
+  Widget passwordtextfield() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 20.0, left: 20.0),
+      child: TextFormField(
+        validator: (value) {
+          if (value!.isEmpty) {
+            return "Şifrenizi giriniz ";
+          } else if (value.length < 6) {
+            return "Şifreniz en az 6 karakter olmalıdır";
+          } else {
+            return null;
+          }
+        },
+        onSaved: (value) {
+          password = value!;
+        },
+        obscureText: _obscureText, // Şifre gizleme durumu
+        decoration: InputDecoration(
+          hintText: "Şifre",
+          hintStyle: TextStyle(
+            color: Colors.grey,
+            fontSize: 25,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your backgroundColor
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your buttonColor
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureText ? Icons.visibility : Icons.visibility_off,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Align forgotPasswordButton() {
+    return Align(
+      alignment: Alignment.centerRight,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: TextButton(
+                onPressed: () {
+          Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => ForgotPassword()));
+                },
+                child: Text(
+          "Şifremi Unuttum ?",
+          style: TextStyle(
+            color:Colors.black54,
+            fontSize: 20,
+            fontStyle: FontStyle.italic,
+          ),
+                ),
+              ),
+        ));
   }
 
   Center createAccountButton() {
@@ -176,8 +230,8 @@ class _LoginPageState extends State<Login_page> {
         icon: Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
         style: ElevatedButton.styleFrom(
           backgroundColor: HexColor(buttonColor),
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: EdgeInsets.symmetric(horizontal: 25),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
       ),
     );
@@ -243,16 +297,17 @@ class _LoginPageState extends State<Login_page> {
         icon: Icon(Icons.check, color: Colors.white),
         style: ElevatedButton.styleFrom(
           backgroundColor: HexColor(buttonColor),
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: EdgeInsets.symmetric(horizontal: 25),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
       ),
     );
   }
 
   Widget customSizeBox() => SizedBox(
-        height: 20.0,
+        height: 50.0,
       );
+
 
   InputDecoration costumInputDecaretion(String hintText) {
     return InputDecoration(

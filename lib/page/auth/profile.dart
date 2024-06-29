@@ -8,6 +8,8 @@ import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/reports.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -89,126 +91,46 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+
+  Future<void> signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Login_page()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: HexColor(backgroundColor),
-        title: Center(
-          child: Text(
-            "ANASAYFA",
-            style: TextStyle(
-              fontSize: 30,
-              color: HexColor(primaryColor),
-            ),
-          ),
-        ),
+        title:    Text(
+                "Kullanıcı Bilgilerini Güncelle",
+                style: TextStyle(
+                  fontSize: 25,
+                  color: Color.fromARGB(255, 58, 57, 57),
+                ),
+              ),
+   
+        
       ),
-      drawer: Drawer(
-        backgroundColor: HexColor(backgroundColor),
-        child: ListView(
-          children: [
-            Center(
-              child: Text(
-                "Menü",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: HexColor(primaryColor),
-                ),
-              ),
-            ),
-            ListTile(
-              title: const Text(
-                "Anasayfa",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Color.fromARGB(255, 53, 49, 49),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),);
-              },
-            ),
-            ListTile(
-              title: const Text(
-                "İlaç Listesi",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Color.fromARGB(255, 53, 49, 49),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MedicinesListPage()),);
-              },
-            ),
-            ListTile(
-              title: const Text(
-                "Raporlar",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Color.fromARGB(255, 53, 49, 49),
-                ),
-              ),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text(
-                "Acil Durum",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Color.fromARGB(255, 53, 49, 49),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => EmergencyPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text(
-                "Profil",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Color.fromARGB(255, 53, 49, 49),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text(
-                "Çıkış",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Color.fromARGB(255, 53, 49, 49),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Login_page()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: menuDrawer(context),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
-        child: ListView(
+        child: personInfo(),
+      ),
+    );
+  }
+
+  Widget personInfo() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 15.0,left: 15.0),
+      child: ListView(
           children: [
             customTextField("Ad", nameController),
-            customTextField("Soyad", surnameController),
+            customTextField("Soyad", surnameController, ),
             customTextField("E-Mail", emailController),
             customTextField("Telefon", numberController),
             customTextField("Yaş", ageController),
@@ -216,20 +138,165 @@ class _ProfilePageState extends State<ProfilePage> {
             customTextField("Kilo", weightController),
             customTextField("Boy", heightController),
             SizedBox(height: 20.0),
-            ElevatedButton(
-              
-              onPressed: updateUserData,
-              child: Text('Güncelle', style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              ),),
-              style: ElevatedButton.styleFrom(
-              backgroundColor: HexColor(buttonColor),
-              
+            Padding(
+              padding: const EdgeInsets.only(right: 100.0,left: 100.0),
+              child: ElevatedButton(
+                
+                onPressed: updateUserData,
+                child: Text('Güncelle', style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                ),),
+                style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 35,),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                backgroundColor: HexColor(buttonColor),
+                
+                ),
               ),
             ),
           ],
         ),
+    );
+  }
+
+   Drawer menuDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          Center(
+            child: Text(
+              "Menü",
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.home,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Anasayfa",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+             leading: Icon(
+              Icons.library_books,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "İlaç Listesi",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MedicinesListPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.calendar_month,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Takvim",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ReportsPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.person_add_alt_1_sharp,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Acil Durum",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => EmergencyPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.person,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Profil",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.exit_to_app,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Çıkış",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              signOut(context);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -239,11 +306,22 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: TextField(
         controller: controller,
+        textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color:HexColor(textfieldColor)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: HexColor(textfieldColor))
+          ),
+        
+          
         ),
       ),
     );
   }
+
+
+  Widget customSizeBox() => SizedBox(height: 25.0,);
 }

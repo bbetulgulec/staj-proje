@@ -56,7 +56,7 @@ class _AccountPageState extends State<AccountPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: height * .15,
+              height: height * .17,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   fit: BoxFit.cover,
@@ -71,6 +71,7 @@ class _AccountPageState extends State<AccountPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    customSizeBox(),
                     titleText(),
                     customSizeBox(),
                     nametextfield(),
@@ -91,9 +92,17 @@ class _AccountPageState extends State<AccountPage> {
                     customSizeBox(),
                     passwordtextfield(),
                     customSizeBox(),
-                    createAccountButton(),
-                    customSizeBox(),
-                    backToLoginButton(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          backToLoginButton(),
+                          createAccountButton(),
+                        ],
+                      ),
+                    ),
+                    
                   ],
                 ),
               ),
@@ -104,13 +113,16 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Text titleText() {
-    return Text(
-      "HESAP OLUŞTUR ",
-      style: TextStyle(
-        fontSize: 30,
-        fontWeight: FontWeight.bold,
-        color: HexColor('#3F51B5'), // replace with your primaryColor
+  Widget titleText() {
+    return Center(
+      child: Text(
+        "HESAP OLUŞTUR ",
+        style: TextStyle(
+          fontSize: 27,
+          fontWeight: FontWeight.w500,
+          fontStyle: FontStyle.italic,
+          color: HexColor(primaryColor), // replace with your primaryColor
+        ),
       ),
     );
   }
@@ -125,7 +137,7 @@ class _AccountPageState extends State<AccountPage> {
         }
       },
       onSaved: (value) {
-        name = value!;
+        name = value!.toUpperCase();
       },
       style: TextStyle(color: Colors.black),
       decoration: customInputDecoration("Ad "),
@@ -142,7 +154,7 @@ class _AccountPageState extends State<AccountPage> {
         }
       },
       onSaved: (value) {
-        surname = value!;
+        surname = value!.toUpperCase();
       },
       style: TextStyle(color: Colors.black),
       decoration: customInputDecoration("Soyad "),
@@ -227,7 +239,7 @@ class _AccountPageState extends State<AccountPage> {
         }
       },
       onSaved: (value) {
-        gender = value!;
+        gender = value!.toUpperCase();
       },
       style: TextStyle(color: Colors.black),
       decoration: customInputDecoration("Cinsiyet "),
@@ -275,10 +287,10 @@ class _AccountPageState extends State<AccountPage> {
           fontSize: 20,
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: HexColor(backgroundColor)), // replace with your backgroundColor
+          borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your backgroundColor
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: HexColor(buttonColor)), // replace with your buttonColor
+          borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your buttonColor
         ),
         suffixIcon: IconButton(
           icon: Icon(
@@ -308,9 +320,9 @@ class _AccountPageState extends State<AccountPage> {
         icon: Icon(Icons.check, color: Colors.white),
         style: ElevatedButton.styleFrom(
           backgroundColor: HexColor(buttonColor), // replace with your buttonColor
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 25),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(15),
           ),
         ),
       ),
@@ -389,25 +401,25 @@ class _AccountPageState extends State<AccountPage> {
           );
         },
         label: Text(
-          "Giriş sayfasına geri dön",
+          "Giriş sayfasına  geri dön",
           style: TextStyle(
-            color: Colors.white,
+            color:HexColor(ButtonText),
             fontSize: 15.0,
           ),
         ),
-        icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black45),
         style: ElevatedButton.styleFrom(
-          backgroundColor: HexColor(buttonColor), // replace with your buttonColor
-          padding: EdgeInsets.symmetric(horizontal: 15),
+          backgroundColor: HexColor(buttonColor2), // replace with your buttonColor
+          padding: EdgeInsets.symmetric(horizontal: 25,vertical: 20),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(15),
           ),
         ),
       ),
     );
   }
 
-  Widget customSizeBox() => SizedBox(height: 20.0,);
+  Widget customSizeBox() => SizedBox(height: 40.0,);
 
   InputDecoration customInputDecoration(String hintText) {
     return InputDecoration(
@@ -417,10 +429,10 @@ class _AccountPageState extends State<AccountPage> {
         fontSize: 20,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(backgroundColor)), // replace with your backgroundColor
+        borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your backgroundColor
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(buttonColor)), // replace with your buttonColor
+        borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your buttonColor
       ),
     );
   }

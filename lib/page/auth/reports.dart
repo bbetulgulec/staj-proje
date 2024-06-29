@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:remember_medicine/page/auth/emergencyContacts.dart';
+import 'package:remember_medicine/page/auth/home.dart';
+import 'package:remember_medicine/page/auth/login.dart';
+import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({Key? key}) : super(key: key);
@@ -11,260 +17,486 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
-  Map<DateTime, List<Map<String, dynamic>>> usedMedicinesMap = {};
-  Map<DateTime, String> medicineStatusMap = {}; // Günlerin durumunu tutan harita
-  int totalMedicinesCount = 0; // Kullanılması gereken toplam ilaç sayısı
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  DateTime _firstDay = DateTime.utc(2000, 1, 1);
-  DateTime _lastDay = DateTime.utc(2100, 12, 31);
+
   List<Map<String, dynamic>> _selectedEvents = [];
+  List<Map<String, dynamic>> todayMedicines = [];
+  Set<String> usedMedicines = {};
+  int todayMedicinesCount = 0;
+
+  final FirebaseAuth mAuth = FirebaseAuth.instance;
+  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
 
   @override
   void initState() {
     super.initState();
+    fetchTodayMedicines();
     fetchUsedMedicines();
-    fetchMedicineStatus();
   }
 
-  void fetchUsedMedicines() async {
-    User? currentUser = _auth.currentUser;
+  void fetchTodayMedicines() async {
+    User? currentUser = mAuth.currentUser;
     if (currentUser != null) {
-      DatabaseReference usedMedicinesRef = _databaseReference
+      DatabaseReference medicationRef = FirebaseDatabase.instance
+          .ref()
           .child('users')
           .child(currentUser.uid)
-          .child('todayOfUsedMedicine');
+          .child('mounthMedicine');
 
       try {
-        DatabaseEvent event = await usedMedicinesRef.once();
+        DatabaseEvent event = await medicationRef.once();
         DataSnapshot snapshot = event.snapshot;
-        Map<dynamic, dynamic>? usedMedicinesData = snapshot.value as Map<dynamic, dynamic>?;
 
-        if (usedMedicinesData != null) {
-          Map<DateTime, List<Map<String, dynamic>>> tempMedicinesMap = {};
+        DateTime now = DateTime.now();
+        String todayString = '${now.year}-${now.month}-${now.day}';
 
-          usedMedicinesData.forEach((key, value) {
-            if (value is Map<dynamic, dynamic>) {
-              value.forEach((medicineName, details) {
-                if (details is Map<dynamic, dynamic> && details.containsKey('time')) {
-                  List<String> dateParts = key.split('-');
-                  if (dateParts.length == 3) {
-                    String year = dateParts[0];
-                    String month = dateParts[1].padLeft(2, '0');
-                    String day = dateParts[2].padLeft(2, '0');
-                    String dateString = '$year-$month-$day';
-                    try {
-                      DateTime date = DateTime.parse(dateString);
-                      if (!tempMedicinesMap.containsKey(date)) {
-                        tempMedicinesMap[date] = [];
-                      }
-                      tempMedicinesMap[date]!.add({
-                        'name': medicineName,
-                        'time': details['time'],
-                      });
-                    } catch (e) {
-                      print('Invalid date format for dateString: $dateString');
-                    }
-                  }
-                }
+        List<Map<String, dynamic>> medicinesForToday = [];
+
+        if (snapshot.value != null && snapshot.value is Map) {
+          Map<dynamic, dynamic> medicinesData = snapshot.value as Map<dynamic, dynamic>;
+
+          medicinesData.forEach((day, medicineDetails) {
+            if (medicineDetails is Map && day == todayString) {
+              medicineDetails.forEach((medicineName, time) {
+                medicinesForToday.add({
+                  'name': medicineName,
+                  'time': time,
+                });
               });
             }
           });
-
-          setState(() {
-            usedMedicinesMap = tempMedicinesMap;
-            totalMedicinesCount = usedMedicinesData.length;
-            // İlk ve son tarihleri belirle
-            if (tempMedicinesMap.isNotEmpty) {
-              List<DateTime> dates = tempMedicinesMap.keys.toList();
-              dates.sort();
-              _firstDay = dates.first;
-              _lastDay = dates.last;
-            }
-          });
         }
+
+        setState(() {
+          todayMedicines = medicinesForToday;
+          todayMedicinesCount = medicinesForToday.length;
+        });
       } catch (error) {
-        print('Error fetching used medicines: $error');
+        print('İlaç verileri getirilirken hata oluştu: $error');
       }
     }
   }
 
-  void fetchMedicineStatus() async {
-    User? currentUser = _auth.currentUser;
+  Future<void> fetchUsedMedicines() async {
+    User? currentUser = mAuth.currentUser;
     if (currentUser != null) {
-      DatabaseReference medicinesRef = _databaseReference
+      DateTime now = DateTime.now();
+      String todayString = '${now.year}-${now.month}-${now.day}';
+
+      DatabaseReference usedMedicinesRef = databaseReference
           .child('users')
           .child(currentUser.uid)
-          .child('medicines');
+          .child('todayOfUsedMedicine')
+          .child(todayString);
 
-      try {
-        DatabaseEvent event = await medicinesRef.once();
-        DataSnapshot snapshot = event.snapshot;
-        Map<dynamic, dynamic>? medicinesData = snapshot.value as Map<dynamic, dynamic>?;
+      DatabaseEvent event = await usedMedicinesRef.once();
+      DataSnapshot snapshot = event.snapshot;
 
-        if (medicinesData != null) {
-          Map<DateTime, String> tempStatusMap = {};
+      if (snapshot.value != null && snapshot.value is Map) {
+        Map<dynamic, dynamic> usedMedicinesData = snapshot.value as Map<dynamic, dynamic>;
+        Set<String> usedMedicinesSet = Set<String>();
 
-          DateTime now = DateTime.now();
-          String todayString = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        usedMedicinesData.forEach((medicineName, medicineDetails) {
+          usedMedicinesSet.add(medicineName);
+        });
 
-          medicinesData.forEach((medicineName, medicineDetails) {
-            if (medicineDetails is Map && medicineDetails['days'] is Map) {
-              Map<dynamic, dynamic> daysData = medicineDetails['days'] as Map<dynamic, dynamic>;
-
-              daysData.forEach((day, dates) {
-                try {
-                  DateTime date;
-                  if (day is String) {
-                    date = parseTurkishDay(day); // Türkçe gün adını DateTime'a çevir
-                  } else {
-                    throw FormatException('Unsupported date format');
-                  }
-
-                  String status = tempStatusMap[date] ?? 'none';
-
-                  if (dates is Map) {
-                    Map<String, String> datesMap = Map<String, String>.from(dates);
-                    if (datesMap.containsKey(todayString)) {
-                      if (status == 'none' || status == 'some') {
-                        tempStatusMap[date] = 'some';
-                      } else if (status == 'all') {
-                        tempStatusMap[date] = 'all';
-                      }
-                    }
-                  }
-                } catch (e) {
-                  print('Invalid date format for day: $day'); // Handle the invalid date format
-                }
-              });
-            }
-          });
-
-          usedMedicinesMap.forEach((date, medicines) {
-            if (tempStatusMap[date] == 'some' || tempStatusMap[date] == 'none') {
-              tempStatusMap[date] = 'some';
-            } else if (tempStatusMap[date] == 'all') {
-              tempStatusMap[date] = 'all';
-            }
-          });
-
-          setState(() {
-            medicineStatusMap = tempStatusMap;
-          });
-        }
-      } catch (error) {
-        print('Error fetching medicine status: $error');
+        setState(() {
+          usedMedicines = usedMedicinesSet;
+        });
       }
     }
   }
 
-  DateTime parseTurkishDay(String day) {
-    Map<String, int> dayMapping = {
-      'Pazartesi': 1,
-      'Salı': 2,
-      'Çarşamba': 3,
-      'Perşembe': 4,
-      'Cuma': 5,
-      'Cumartesi': 6,
-      'Pazar': 7,
-    };
+  Future<List<Map<String, dynamic>>> _fetchUsedMedicinesForDay(DateTime day) async {
+    User? currentUser = mAuth.currentUser;
+    List<Map<String, dynamic>> eventsForDay = [];
+    if (currentUser != null) {
+      String dayString = '${day.year}-${day.month}-${day.day}';
 
-    int dayOfWeek = dayMapping[day]!;
-    DateTime now = DateTime.now();
-    int daysToAdd = (dayOfWeek - now.weekday + 7) % 7;
-    DateTime date = now.add(Duration(days: daysToAdd));
-    return date;
+      DatabaseReference usedMedicinesRef = databaseReference
+          .child('users')
+          .child(currentUser.uid)
+          .child('todayOfUsedMedicine')
+          .child(dayString);
+
+      DatabaseEvent event = await usedMedicinesRef.once();
+      DataSnapshot snapshot = event.snapshot;
+
+      if (snapshot.value != null && snapshot.value is Map) {
+        Map<dynamic, dynamic> usedMedicinesData = snapshot.value as Map<dynamic, dynamic>;
+
+        usedMedicinesData.forEach((medicineName, medicineDetails) {
+          eventsForDay.add({
+            'name': medicineName,
+            'time': (medicineDetails as Map<dynamic, dynamic>)['time'],
+          });
+        });
+      }
+    }
+    return eventsForDay;
   }
 
-  List<Map<String, dynamic>> _getEventsForDay(DateTime day) {
-    return usedMedicinesMap[day] ?? [];
+  Future<Color> _getColorForDay(DateTime day) async {
+    String dayString = '${day.year}-${day.month}-${day.day}';
+    if (dayString == '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}') {
+      if (usedMedicines.length == todayMedicinesCount && todayMedicinesCount > 0) {
+        return Colors.green;
+      } else if (usedMedicines.isNotEmpty) {
+        return Colors.yellow;
+      } else {
+        return Colors.red;
+      }
+    } else if (day.isAfter(DateTime.now())) {
+      return Color.fromARGB(255, 214, 211, 211); 
+    } 
+    else {
+      DatabaseReference dayRef = databaseReference
+          .child('users')
+          .child(mAuth.currentUser!.uid)
+          .child('todayOfUsedMedicine')
+          .child(dayString);
+
+      DatabaseEvent event = await dayRef.once();
+      DataSnapshot snapshot = event.snapshot;
+
+      if (snapshot.value != null && snapshot.value is Map) {
+        return Colors.green;
+      } else {
+        return Colors.red;
+      }
+    }
   }
 
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    setState(() {
-      _selectedDay = selectedDay;
-      _focusedDay = focusedDay;
-      _selectedEvents = _getEventsForDay(selectedDay);
-    });
+
+  Future<void> signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Login_page()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Kullanılan İlaçlar Raporu'),
+        title: const Text('Kullanılan İlaçlar Raporu'),
       ),
+       drawer: menuDrawer(context),
       body: Column(
         children: [
-          TableCalendar(
-            firstDay: _firstDay,
-            lastDay: _lastDay,
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: _onDaySelected,
-            onFormatChanged: (format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
-            eventLoader: _getEventsForDay,
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, date, _) {
-                Color? dayColor;
+          Calender(),
+          getTheMedicine(),
+        ],
+      ),
+    );
+  }
 
-                if (medicineStatusMap.containsKey(date)) {
-                  String status = medicineStatusMap[date]!;
-                  if (status == 'all') {
-                    dayColor = Colors.green;
-                  } else if (status == 'some') {
-                    dayColor = Colors.yellow;
-                  } else if (status == 'none') {
-                    dayColor = Colors.red;
-                  }
-                }
+  Expanded getTheMedicine() {
+    return Expanded(
+          child: _selectedEvents.isEmpty
+              ? const Center(child: Text('Seçilen günde ilaç kullanımı yok'))
+              : ListView.builder(
+                  itemCount: _selectedEvents.length,
+                  itemBuilder: (context, index) {
+                    final event = _selectedEvents[index];
+                    return Card(
+                      elevation: 12.0,
+                      margin: EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+                      child: ListTile(
+                        title: Text(event['name']),
+                        subtitle: Text(event['time']),
+                      ),
+                    );
+                  },
+                ),
+        );
+  }
 
-                if (dayColor != null) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: dayColor,
-                    ),
-                    margin: const EdgeInsets.all(6.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      date.day.toString(),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }
-                return null;
-              },
+     Drawer menuDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          Center(
+            child: Text(
+              "Menü",
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.black,
+              ),
             ),
           ),
-          Expanded(
-            child: _selectedEvents.isEmpty
-                ? Center(child: Text('İlaç kullanılan günü seçin.'))
-                : ListView.builder(
-                    itemCount: _selectedEvents.length,
-                    itemBuilder: (context, index) {
-                      var event = _selectedEvents[index];
-                      return Card(
-                        child: ListTile(
-                          title: Text(event['name']),
-                          subtitle: Text('Kullanım Zamanı: ${event['time']}'),
-                        ),
-                      );
-                    },
-                  ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.home,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Anasayfa",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+             leading: Icon(
+              Icons.library_books,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "İlaç Listesi",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MedicinesListPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.calendar_month,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Takvim",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ReportsPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.person_add_alt_1_sharp,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Acil Durum",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => EmergencyPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.person,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Profil",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.exit_to_app,
+              size: 30,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Çıkış",
+              style: TextStyle(
+                fontSize: 30,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              signOut(context);
+            },
           ),
         ],
       ),
     );
   }
+
+
+  TableCalendar<dynamic> Calender() {
+    return TableCalendar(
+          firstDay: DateTime.utc(2000, 1, 1),
+          lastDay: DateTime.utc(2100, 12, 31),
+          focusedDay: _focusedDay,
+          calendarFormat: _calendarFormat,
+          selectedDayPredicate: (day) {
+            return isSameDay(_selectedDay, day);
+          },
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+            _fetchUsedMedicinesForDay(selectedDay).then((events) {
+              setState(() {
+                _selectedEvents = events;
+              });
+            });
+          },
+          onFormatChanged: (format) {
+            setState(() {
+              _calendarFormat = format;
+            });
+          },
+          calendarBuilders: CalendarBuilders(
+            defaultBuilder: (context, date, _) {
+              return FutureBuilder<Color>(
+                future: _getColorForDay(date),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey,
+                      ),
+                      margin: const EdgeInsets.all(6.0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        date.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                      margin: const EdgeInsets.all(6.0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        date.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: snapshot.data,
+                      ),
+                      margin: const EdgeInsets.all(6.0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        date.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+            todayBuilder: (context, date, _) {
+              return FutureBuilder<Color>(
+                future: _getColorForDay(date),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey,
+                      ),
+                      margin: const EdgeInsets.all(6.0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        date.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                      margin: const EdgeInsets.all(6.0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        date.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: snapshot.data,
+                      ),
+                      margin: const EdgeInsets.all(6.0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        date.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+            selectedBuilder: (context, date, _) {
+              return Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.blue, width: 2.0),
+                ),
+                margin: const EdgeInsets.all(6.0),
+                alignment: Alignment.center,
+                child: Text(
+                  date.day.toString(),
+                  style: const TextStyle(color: Colors.black),
+                ),
+              );
+            },
+          ),
+        );
+  }
+   
+   
+    Widget customSizeBox() => SizedBox( height: 50.0,);
 }
