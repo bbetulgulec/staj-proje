@@ -145,10 +145,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: updateUserData,
                 child: Text('Güncelle', style: TextStyle(
                   color: Colors.white,
-                  fontSize: 30,
+                  fontSize: 15,
                 ),),
                 style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 35,),
+                padding: EdgeInsets.symmetric(horizontal: 25,),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                 backgroundColor: HexColor(buttonColor),
                 

@@ -95,102 +95,115 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
         title: const Text('İlaç Listesi'),
       ),
       drawer: menuDrawer(context),
+
       body: Container(
-        margin: EdgeInsets.only(left: 20.0, right: 20.0),
-        child: Container(
-          child: StreamBuilder(
-            stream: databaseReference
-                .child('users')
-                .child(user.uid)
-                .child('medicines')
-                .onValue,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
+        child: StreamBuilder(
+          stream: databaseReference
+              .child('users')
+              .child(user.uid)
+              .child('medicines')
+              .onValue,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-              if (snapshot.hasError) {
-                return Center(
-                    child: Text('Bir hata oluştu: ${snapshot.error}'));
-              }
+            if (snapshot.hasError) {
+              return Center(
+                  child: Text('Bir hata oluştu: ${snapshot.error}'));
+            }
 
-              if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-                Map<dynamic, dynamic> medicines =
-                    snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-                return ListView.builder(
-                  itemCount: medicines.length,
-                  itemBuilder: (context, index) {
-                    String medicineName = medicines.keys.elementAt(index);
-                    var medicineData = medicines[medicineName];
+            if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+              Map<dynamic, dynamic> medicines =
+                  snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: BouncingScrollPhysics(),
+                itemCount: medicines.length,
+                itemBuilder: (context, index) {
+                  String medicineName = medicines.keys.elementAt(index);
+                  var medicineData = medicines[medicineName];
 
-                    // medicineData'nın türünü kontrol et
-                    if (medicineData is Map<dynamic, dynamic>) {
-                      List<String> days = [];
-                      Set<String> times = Set<String>();
+                  // medicineData'nın türünü kontrol et
+                  if (medicineData is Map<dynamic, dynamic>) {
+                    List<String> days = [];
+                    Set<String> times = Set<String>();
 
-                      if (medicineData['days'] != null) {
-                        (medicineData['days'] as Map).forEach((day, value) {
-                          days.add(day);
-                          if (value is Map) {
-                            value.forEach((date, time) {
-                              if (time is List) {
-                                times.addAll(
-                                    time.map((t) => t.toString()).toList());
-                              } else {
-                                times.add(time.toString());
-                              }
-                            });
-                          }
-                        });
-                      }
-
-                      String timesString = times.join(' - ');
-
-                      return Card(
-                        elevation: 12.0,
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 28, vertical: 10),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "İlaç Adı: $medicineName",
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  if (days.isNotEmpty)
-                                    Text("Gün: ${days.first}",
-                                        style: TextStyle(fontSize: 17)),
-                                  if (times.isNotEmpty)
-                                    Text("Saat: $timesString",
-                                        style: TextStyle(fontSize: 15)),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                ],
-                              ),
-                              GestureandButton(
-                                  user, medicineName, medicineData, context),
-                            ],
-                          ),
-                        ),
-                      );
-                    } else {
-                      return SizedBox.shrink();
+                    if (medicineData['days'] != null) {
+                      (medicineData['days'] as Map).forEach((day, value) {
+                        days.add(day);
+                        if (value is Map) {
+                          value.forEach((date, time) {
+                            if (time is List) {
+                              times.addAll(
+                                  time.map((t) => t.toString()).toList());
+                            } else {
+                              times.add(time.toString());
+                            }
+                          });
+                        }
+                      });
                     }
-                  },
-                );
-              }
 
-              return Center(child: Text('İlaç bulunamadı.'));
-            },
+                    String timesString = times.join(' - ');
+return Card(
+  elevation: 12.0,
+  margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+  child: Padding(
+    padding: const EdgeInsets.all(20.0),
+    child: Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "İlaç Adı: $medicineName",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  if (days.isNotEmpty)
+                    Text("Gün: ${days.first}",
+                        style: TextStyle(fontSize: 17)),
+                ],
+              ),
+            ),
+            GestureandButton(user, medicineName, medicineData, context),
+          ],
+        ),
+        if (times.isNotEmpty)
+          Wrap(
+            spacing: 2.0, // Aralarındaki yatay boşluk
+            runSpacing: 2.0, // Aralarındaki dikey boşluk
+            children: times.map((time) {
+              return Chip(
+                label: Text(
+                  "Saat: $time",
+                  style: TextStyle(fontSize: 10),
+                ),
+              );
+            }).toList(),
           ),
+      ],
+    ),
+  ),
+);
+
+                  
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                },
+              );
+            }
+
+            return Center(child: Text('İlaç bulunamadı.'));
+          },
         ),
       ),
+   
     );
   }
 

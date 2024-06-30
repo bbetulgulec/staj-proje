@@ -200,28 +200,30 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     double progress = calculateProgress();
-    // Ensure progress is within the valid range
     progress = progress.clamp(0.0, 1.0);
+
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Anasayfa"),
       ),
-      drawer: menuDrawer(context),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                textName(),
-                customSizeBox(),
-                CardList(),
-                CircularProgressBar(progress: progress),
-                customSizeBox(),
-                textTotalMedicines(),
-              ],
-            ),
-          ],
+      drawer: menuDrawer(context, screenSize),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              textName(),
+              customSizeBox(),
+              Expanded(
+                child: CardList(screenSize),
+              ),
+              CircularProgressBar(progress: progress),
+              customSizeBox(),
+              textTotalMedicines(),
+            ],
+          ),
         ),
       ),
     );
@@ -233,7 +235,7 @@ class _HomePageState extends State<HomePage> {
         Text(
           "Toplam İlaç Sayısı: $todayTotalDoses",
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 15,
             color: Color.fromARGB(255, 58, 57, 57),
           ),
         ),
@@ -241,7 +243,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Expanded CardList() {
+  Expanded CardList(Size screenSize) {
     return Expanded(
       child: ListView.builder(
         itemCount: todayMedicines.length,
@@ -252,7 +254,7 @@ class _HomePageState extends State<HomePage> {
               .every((time) => usedMedicines.contains('$medicineName-$time'));
 
           return Card(
-            margin: EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+            margin: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1, vertical: 10),
             elevation: 12,
             child: ListTile(
               title: Text(
@@ -295,19 +297,21 @@ class _HomePageState extends State<HomePage> {
   Widget textName() {
     return Row(
       children: [
-        Text(
-          "Merhaba ${userName.isNotEmpty ? userName.toUpperCase() : ' '} \nBugün Alacağın İlaçlar :",
-          style: TextStyle(
-            fontSize: 35,
-            color: Color.fromARGB(255, 58, 57, 57),
-            fontStyle: FontStyle.italic,
+        Expanded(
+          child: Text(
+            "Merhaba ${userName.isNotEmpty ? userName.toUpperCase() : ' '} \nBugün Alacağın İlaçlar:",
+            style: TextStyle(
+              fontSize: 17,
+              color: Color.fromARGB(255, 58, 57, 57),
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Drawer menuDrawer(BuildContext context) {
+  Drawer menuDrawer(BuildContext context, Size screenSize) {
     return Drawer(
       child: ListView(
         children: [
