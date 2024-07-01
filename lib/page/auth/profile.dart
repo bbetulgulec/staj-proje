@@ -148,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   fontSize: 15,
                 ),),
                 style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20 ),
+                padding: EdgeInsets.symmetric(horizontal: 25,vertical: 25 ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                 backgroundColor: HexColor(buttonColor),
                 
@@ -323,5 +323,5 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
-  Widget customSizeBox() => SizedBox(height: 25.0,);
+  Widget customSizeBox() => SizedBox(height: 20.0,);
 }
