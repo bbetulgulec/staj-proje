@@ -208,7 +208,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Anasayfa"),
       ),
-      drawer: menuDrawer(context, screenSize),
+      drawer: menuDrawer(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -219,9 +219,20 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: CardList(screenSize),
               ),
-              CircularProgressBar(progress: progress),
               customSizeBox(),
-              textTotalMedicines(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: textTotalMedicines(),
+                  ),
+                  Flexible(
+                    flex: 1,
+                    child: CircularProgressBar(progress: progress),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -230,88 +241,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget textTotalMedicines() {
-    return Column(
-      children: [
-        Text(
-          "Toplam İlaç Sayısı: $todayTotalDoses",
-          style: TextStyle(
-            fontSize: 15,
-            color: Color.fromARGB(255, 58, 57, 57),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Expanded CardList(Size screenSize) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: todayMedicines.length,
-        itemBuilder: (context, index) {
-          String medicineName = todayMedicines[index]['name'];
-          List<String> medicineTimes = todayMedicines[index]['times'];
-          bool allTimesUsed = medicineTimes
-              .every((time) => usedMedicines.contains('$medicineName-$time'));
-
-          return Card(
-            margin: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1, vertical: 10),
-            elevation: 12,
-            child: ListTile(
-              title: Text(
-                medicineName,
-                style: TextStyle(fontSize: 23),
-              ),
-              subtitle: Text('Saat: ${medicineTimes.join(", ")}'),
-              trailing: allTimesUsed
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text(
-                          'İlaç tamamlandı',
-                          style: TextStyle(color: Colors.green, fontSize: 20),
-                        ),
-                      ],
-                    )
-                  : IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: () {
-                        for (String time in medicineTimes) {
-                          if (!usedMedicines.contains('$medicineName-$time')) {
-                            saveUsedMedicines(medicineName, time);
-                            break;
-                          }
-                        }
-                        // İlerleme oranını güncelle
-                        setState(() {});
-                      },
-                    ),
-            ),
-          );
-        },
+    return Text(
+      "Toplam İlaç Sayısı: $todayTotalDoses",
+      style: TextStyle(
+        fontSize: 25,
+        color: Color.fromARGB(255, 58, 57, 57),
       ),
     );
   }
 
-  Widget textName() {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            "Merhaba ${userName.isNotEmpty ? userName.toUpperCase() : ' '} \nBugün Alacağın İlaçlar:",
-            style: TextStyle(
-              fontSize: 17,
-              color: Color.fromARGB(255, 58, 57, 57),
-              fontStyle: FontStyle.italic,
-            ),
+  Widget CircularProgressBar({required double progress}) {
+    return SleekCircularSlider(
+      appearance: CircularSliderAppearance(
+        size: 150, // Boyutu buradan ayarlayabilirsiniz
+        customColors: CustomSliderColors(
+          trackColor: Color.fromARGB(255, 241, 230, 230),
+          progressBarColor: Color.fromARGB(255, 9, 206, 45),
+          shadowColor: Color.fromARGB(255, 5, 136, 30),
+          dotColor: Color.fromARGB(255, 14, 12, 12),
+        ),
+        infoProperties: InfoProperties(
+          mainLabelStyle: TextStyle(
+            color: Color.fromARGB(255, 12, 11, 11),
+            fontSize: 15,
           ),
         ),
-      ],
+        startAngle: 10,
+        angleRange: 360,
+      ),
+      min: 0,
+      max: 100,
+      initialValue: progress * 100,
     );
   }
 
-  Drawer menuDrawer(BuildContext context, Size screenSize) {
+  Drawer menuDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         children: [
@@ -432,12 +396,12 @@ class _HomePageState extends State<HomePage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.exit_to_app,
+              Icons.logout,
               size: 30,
               color: Colors.black45,
             ),
             title: const Text(
-              "Çıkış",
+              "Çıkış Yap",
               style: TextStyle(
                 fontSize: 30,
                 color: Color.fromARGB(255, 53, 49, 49),
@@ -447,47 +411,108 @@ class _HomePageState extends State<HomePage> {
               signOut(context);
             },
           ),
+          customSizeBox(),
         ],
       ),
     );
   }
 
-  Widget customSizeBox() => SizedBox(height: 25.0);
-}
+  SizedBox customSizeBox() => SizedBox(height: 20);
 
-class CircularProgressBar extends StatelessWidget {
-  final double progress;
+  Expanded CardList(Size screenSize) {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: todayMedicines.length,
+        itemBuilder: (context, index) {
+          String medicineName = todayMedicines[index]['name'];
+          List<String> medicineTimes = todayMedicines[index]['times'];
+          bool allTimesUsed = medicineTimes
+              .every((time) => usedMedicines.contains('$medicineName-$time'));
 
-  const CircularProgressBar({required this.progress, Key? key})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SleekCircularSlider(
-      appearance: CircularSliderAppearance(
-        customColors: CustomSliderColors(
-          progressBarColor: Colors.blue,
-          trackColor: Colors.grey,
-          dotColor: Colors.white,
-          shadowColor: Colors.blueAccent,
-          shadowMaxOpacity: 0.5,
-        ),
-        infoProperties: InfoProperties(
-          mainLabelStyle: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          modifier: (double value) {
-            return '${(value * 100).toStringAsFixed(0)}%';
-          },
-        ),
-        startAngle: 270,
-        angleRange: 360,
+          return Card(
+            elevation: 12,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10.0, right: 5.0,left: 5.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        medicineName,
+                        style: TextStyle(fontSize: 17),
+                      ),
+                      if (allTimesUsed)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check, color: Colors.green, size: 17),
+                            SizedBox(width: 8),
+                            Text(
+                              'İlaç tamamlandı',
+                              style:
+                                  TextStyle(color: Colors.green, fontSize: 15),
+                            ),
+                          ],
+                        )
+                      else
+                        IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () {
+                            for (String time in medicineTimes) {
+                              if (!usedMedicines
+                                  .contains('$medicineName-$time')) {
+                                saveUsedMedicines(medicineName, time);
+                                break;
+                              }
+                            }
+                            // İlerleme oranını güncelle
+                            setState(() {});
+                          },
+                        ),
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 6.0,
+                      runSpacing: 6.0,
+                      children: medicineTimes.map((time) {
+                        bool isUsed =
+                            usedMedicines.contains('$medicineName-$time');
+                        return Chip(
+                          label: Text(time),
+                          backgroundColor: isUsed ? Colors.green : Colors.red,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
-      min: 0,
-      max: 1,
-      initialValue: progress,
     );
   }
+
+  Widget textName() {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            "Merhaba ${userName.isNotEmpty ? userName.toUpperCase() : ' '} \nBugün Alacağın İlaçlar:",
+            style: TextStyle(
+              fontSize: 17,
+              color: Color.fromARGB(255, 58, 57, 57),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
 }

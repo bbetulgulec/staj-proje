@@ -95,7 +95,6 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
         title: const Text('İlaç Listesi'),
       ),
       drawer: menuDrawer(context),
-
       body: Container(
         child: StreamBuilder(
           stream: databaseReference
@@ -109,8 +108,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
             }
 
             if (snapshot.hasError) {
-              return Center(
-                  child: Text('Bir hata oluştu: ${snapshot.error}'));
+              return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
             }
 
             if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
@@ -146,52 +144,56 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
                     }
 
                     String timesString = times.join(' - ');
-return Card(
-  elevation: 12.0,
-  margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-  child: Padding(
-    padding: const EdgeInsets.all(20.0),
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "İlaç Adı: $medicineName",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  if (days.isNotEmpty)
-                    Text("Gün: ${days.first}",
-                        style: TextStyle(fontSize: 17)),
-                ],
-              ),
-            ),
-            GestureandButton(user, medicineName, medicineData, context),
-          ],
-        ),
-        if (times.isNotEmpty)
-          Wrap(
-            spacing: 2.0, // Aralarındaki yatay boşluk
-            runSpacing: 2.0, // Aralarındaki dikey boşluk
-            children: times.map((time) {
-              return Chip(
-                label: Text(
-                  "Saat: $time",
-                  style: TextStyle(fontSize: 10),
-                ),
-              );
-            }).toList(),
-          ),
-      ],
-    ),
-  ),
-);
-
-                  
+                    return Card(
+                      elevation: 12.0,
+                      margin: EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 10.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "İlaç Adı: $medicineName",
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      if (days.isNotEmpty)
+                                        Text("Gün: ${days.first}",
+                                            style: TextStyle(fontSize: 17)),
+                                    ],
+                                  ),
+                                ),
+                                GestureandButton(
+                                    user, medicineName, medicineData, context),
+                              ],
+                            ),
+                            if (times.isNotEmpty)
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: Wrap(
+                                  spacing: 8.0, // Aralarındaki yatay boşluk
+                                  runSpacing: 4.0, // Aralarındaki dikey boşluk
+                                  children: times.map((time) {
+                                    return Chip(
+                                      label: Text(
+                                        "Saat: $time",
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
                   } else {
                     return SizedBox.shrink();
                   }
@@ -203,7 +205,6 @@ return Card(
           },
         ),
       ),
-   
     );
   }
 
@@ -411,4 +412,6 @@ return Card(
       ),
     );
   }
+
+
 }

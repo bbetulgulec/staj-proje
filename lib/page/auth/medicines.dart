@@ -42,143 +42,145 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
       appBar: AppBar(
         title: Text('İlaç Güncelle', style: TextStyle(color: Color.fromARGB(255, 58, 57, 57))),
       ),
-      body: Container(
-        margin: const EdgeInsets.only(left: 20.0, right: 20.0),
-        child: Form(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              customSizeBox(),
-              const Text(
-                "Adı :",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 58, 57, 57),
-                  fontSize: 30,
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TextFormField(
-                  controller: nameController,
-                  onSaved: (value) {
-                    nameController.text = value!;
-                  },
-                  decoration: const InputDecoration(border: InputBorder.none),
-                ),
-              ),
-              customSizeBox(),
-              const Text(
-                "Hangi gün kullanacaksın:",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 58, 57, 57),
-                  fontSize: 30,
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: DropdownButtonFormField<String>(
-                  value: selectedDay.isEmpty ? null : selectedDay,
-                  onChanged: (newValue) {
-                    setState(() {
-                      selectedDay = newValue!;
-                    });
-                  },
-                  items: days.map((day) {
-                    return DropdownMenuItem(
-                      value: day,
-                      child: Text(day),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Gün seçiniz",
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.only(left: 20.0, right: 20.0),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                customSizeBox(),
+                const Text(
+                  "Adı :",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 58, 57, 57),
+                    fontSize: 20,
                   ),
                 ),
-              ),
-              customSizeBox(),
-              const Text(
-                "Günde kaç defa alacaksın :",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 58, 57, 57),
-                  fontSize: 30,
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: TextFormField(
+                    controller: nameController,
+                    onSaved: (value) {
+                      nameController.text = value!;
+                    },
+                    decoration: const InputDecoration(border: InputBorder.none),
+                  ),
                 ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(),
-                  borderRadius: BorderRadius.circular(10),
+                customSizeBox(),
+                const Text(
+                  "Hangi gün kullanacaksın:",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 58, 57, 57),
+                    fontSize: 20,
+                  ),
                 ),
-                child: TextFormField(
-                  controller: timesController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    setState(() {
-                      int times = int.tryParse(value) ?? 0;
-                      selectedTimes = List.generate(times, (index) => '');
-                    });
-                  },
-                  decoration: const InputDecoration(border: InputBorder.none),
-                ),
-              ),
-              customSizeBox(),
-              const Text(
-                "Hangi saatlerde kullanacaksın:",
-                style: TextStyle(
-                  fontSize: 30,
-                ),
-              ),
-              ...List.generate(selectedTimes.length, (index) {
-                return Container(
-                  margin: EdgeInsets.only(top: 10),
+                Container(
                   decoration: BoxDecoration(
                     border: Border.all(),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: DropdownButtonFormField<String>(
-                    value: selectedTimes[index].isEmpty ? null : selectedTimes[index],
+                    value: selectedDay.isEmpty ? null : selectedDay,
                     onChanged: (newValue) {
                       setState(() {
-                        selectedTimes[index] = newValue!;
+                        selectedDay = newValue!;
                       });
                     },
-                    items: hours.map((time) {
+                    items: days.map((day) {
                       return DropdownMenuItem(
-                        value: time,
-                        child: Text(time),
+                        value: day,
+                        child: Text(day),
                       );
                     }).toList(),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: "Saat seçiniz",
+                      hintText: "Gün seçiniz",
                     ),
                   ),
-                );
-              }),
-              customSizeBox(),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    formKey.currentState!.save();
-                    saveMedicine();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: HexColor(buttonColor),
-                  ),
-                  child: const Text(
-                    "Güncelle",
-                    style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+                customSizeBox(),
+                const Text(
+                  "Günde kaç defa alacaksın :",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 58, 57, 57),
+                    fontSize: 20,
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-            ],
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: TextFormField(
+                    controller: timesController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {
+                        int times = int.tryParse(value) ?? 0;
+                        selectedTimes = List.generate(times, (index) => '');
+                      });
+                    },
+                    decoration: const InputDecoration(border: InputBorder.none),
+                  ),
+                ),
+                customSizeBox(),
+                const Text(
+                  "Hangi saatlerde kullanacaksın:",
+                  style: TextStyle(
+                    fontSize: 20,
+                  ),
+                ),
+                ...List.generate(selectedTimes.length, (index) {
+                  return Container(
+                    margin: EdgeInsets.only(top: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedTimes[index].isEmpty ? null : selectedTimes[index],
+                      onChanged: (newValue) {
+                        setState(() {
+                          selectedTimes[index] = newValue!;
+                        });
+                      },
+                      items: hours.map((time) {
+                        return DropdownMenuItem(
+                          value: time,
+                          child: Text(time),
+                        );
+                      }).toList(),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Saat seçiniz",
+                      ),
+                    ),
+                  );
+                }),
+                customSizeBox(),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      formKey.currentState!.save();
+                      saveMedicine();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: HexColor(buttonColor),
+                    ),
+                    child: const Text(
+                      "Güncelle",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
@@ -186,40 +188,41 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
   }
 
   Widget customSizeBox() => const SizedBox(height: 20.0);
-void saveMedicine() async {
-  User? user = firebaseAuth.currentUser;
-  if (user != null) {
-    final newMedicineRef = databaseReference
-        .child('users')
-        .child(user.uid)
-        .child('medicines')
-        .child(nameController.text);
 
-    // Yeni ilaç verisini hazırla
-    Map<String, dynamic> medicineData = Map<String, dynamic>.from(widget.medicineData);
-    medicineData['days'] ??= {};
+  void saveMedicine() async {
+    User? user = firebaseAuth.currentUser;
+    if (user != null) {
+      final newMedicineRef = databaseReference
+          .child('users')
+          .child(user.uid)
+          .child('medicines')
+          .child(nameController.text);
 
-    DateTime now = DateTime.now();
-    Map<String, List<String>> monthDates = {};
-    for (int i = 0; i < 30; i++) {
-      DateTime date = now.add(Duration(days: i));
-      if (date.weekday == days.indexOf(selectedDay) + 1) {
-        String dateString = '${date.year}-${date.month}-${date.day}';
-        monthDates[dateString] = selectedTimes;
+      // Yeni ilaç verisini hazırla
+      Map<String, dynamic> medicineData = Map<String, dynamic>.from(widget.medicineData);
+      medicineData['days'] ??= {};
+
+      DateTime now = DateTime.now();
+      Map<String, List<String>> monthDates = {};
+      for (int i = 0; i < 30; i++) {
+        DateTime date = now.add(Duration(days: i));
+        if (date.weekday == days.indexOf(selectedDay) + 1) {
+          String dateString = '${date.year}-${date.month}-${date.day}';
+          monthDates[dateString] = selectedTimes;
+        }
       }
+      (medicineData['days'] as Map)[selectedDay] = monthDates;
+
+      // Yeni ilaç verisini güncelle veya ekle
+      await newMedicineRef.set(medicineData);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('İlaç bilgileri başarıyla güncellendi')),
+      );
+
+      Navigator.pop(context, {'name': nameController.text, 'data': medicineData});
     }
-    (medicineData['days'] as Map)[selectedDay] = monthDates;
-
-    // Yeni ilaç verisini güncelle veya ekle
-    await newMedicineRef.set(medicineData);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('İlaç bilgileri başarıyla güncellendi')),
-    );
-
-    Navigator.pop(context, {'name': nameController.text, 'data': medicineData});
   }
-}
 
   String getFirstDayFromMedicineData() {
     if (widget.medicineData.containsKey('days') && (widget.medicineData['days'] as Map).isNotEmpty) {

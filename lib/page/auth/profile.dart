@@ -148,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   fontSize: 15,
                 ),),
                 style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 25,),
+                padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20 ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                 backgroundColor: HexColor(buttonColor),
                 

@@ -169,7 +169,6 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
-
   Future<void> signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
 
@@ -186,7 +185,7 @@ class _ReportsPageState extends State<ReportsPage> {
       appBar: AppBar(
         title: const Text('Kullanılan İlaçlar Raporu'),
       ),
-       drawer: menuDrawer(context),
+      drawer: menuDrawer(context),
       body: Column(
         children: [
           Calender(),
@@ -196,28 +195,38 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
-  Expanded getTheMedicine() {
+  Widget getTheMedicine() {
     return Expanded(
-          child: _selectedEvents.isEmpty
-              ? const Center(child: Text('Seçilen günde ilaç kullanımı yok'))
-              : ListView.builder(
-                  itemCount: _selectedEvents.length,
-                  itemBuilder: (context, index) {
-                    final event = _selectedEvents[index];
-                    return Card(
-                      elevation: 12.0,
-                      margin: EdgeInsets.symmetric(horizontal: 28, vertical: 10),
-                      child: ListTile(
-                        title: Text(event['name']),
-                        subtitle: Text(event['time']),
-                      ),
-                    );
-                  },
-                ),
-        );
+      child: _selectedEvents.isEmpty
+          ? const Center(child: Text('Seçilen günde ilaç kullanımı yok'))
+          : ListView.builder(
+              itemCount: _selectedEvents.length,
+              itemBuilder: (context, index) {
+                final event = _selectedEvents[index];
+                final isUsed = usedMedicines.contains(event['name']);
+                return Card(
+                  elevation: 12.0,
+                  margin: EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+                  child: ListTile(
+                    title: Text(event['name']),
+                    subtitle: Wrap(
+                      spacing: 8.0,
+                      children: event['time']
+                          .split(',')
+                          .map<Widget>((time) => Chip(
+                                label: Text(time),
+                                backgroundColor: isUsed ? Colors.green : Colors.red,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
   }
 
-     Drawer menuDrawer(BuildContext context) {
+  Drawer menuDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         children: [
@@ -253,7 +262,7 @@ class _ReportsPageState extends State<ReportsPage> {
           ),
           customSizeBox(),
           ListTile(
-             leading: Icon(
+            leading: Icon(
               Icons.library_books,
               size: 30,
               color: Colors.black45,
@@ -296,7 +305,7 @@ class _ReportsPageState extends State<ReportsPage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.person_add_alt_1_sharp,
+              Icons.emergency,
               size: 30,
               color: Colors.black45,
             ),
@@ -358,145 +367,146 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
-
   TableCalendar<dynamic> Calender() {
     return TableCalendar(
-          firstDay: DateTime.utc(2000, 1, 1),
-          lastDay: DateTime.utc(2100, 12, 31),
-          focusedDay: _focusedDay,
-          calendarFormat: _calendarFormat,
-          selectedDayPredicate: (day) {
-            return isSameDay(_selectedDay, day);
-          },
-          onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-            _fetchUsedMedicinesForDay(selectedDay).then((events) {
-              setState(() {
-                _selectedEvents = events;
-              });
-            });
-          },
-          onFormatChanged: (format) {
-            setState(() {
-              _calendarFormat = format;
-            });
-          },
-          calendarBuilders: CalendarBuilders(
-            defaultBuilder: (context, date, _) {
-              return FutureBuilder<Color>(
-                future: _getColorForDay(date),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey,
-                      ),
-                      margin: const EdgeInsets.all(6.0),
-                      alignment: Alignment.center,
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                      ),
-                      margin: const EdgeInsets.all(6.0),
-                      alignment: Alignment.center,
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  } else {
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: snapshot.data,
-                      ),
-                      margin: const EdgeInsets.all(6.0),
-                      alignment: Alignment.center,
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  }
-                },
-              );
+      firstDay: DateTime.utc(2000, 1, 1),
+      lastDay: DateTime.utc(2100, 12, 31),
+      focusedDay: _focusedDay,
+      calendarFormat: _calendarFormat,
+      selectedDayPredicate: (day) {
+        return isSameDay(_selectedDay, day);
+      },
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+        });
+        _fetchUsedMedicinesForDay(selectedDay).then((events) {
+          setState(() {
+            _selectedEvents = events;
+          });
+        });
+      },
+      onFormatChanged: (format) {
+        setState(() {
+          _calendarFormat = format;
+        });
+      },
+      calendarBuilders: CalendarBuilders(
+        defaultBuilder: (context, date, _) {
+          return FutureBuilder<Color>(
+            future: _getColorForDay(date),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey,
+                  ),
+                  margin: const EdgeInsets.all(6.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red,
+                  ),
+                  margin: const EdgeInsets.all(6.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              } else {
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: snapshot.data,
+                  ),
+                  margin: const EdgeInsets.all(6.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              }
             },
-            todayBuilder: (context, date, _) {
-              return FutureBuilder<Color>(
-                future: _getColorForDay(date),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey,
-                      ),
-                      margin: const EdgeInsets.all(6.0),
-                      alignment: Alignment.center,
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                      ),
-                      margin: const EdgeInsets.all(6.0),
-                      alignment: Alignment.center,
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  } else {
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: snapshot.data,
-                      ),
-                      margin: const EdgeInsets.all(6.0),
-                      alignment: Alignment.center,
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  }
-                },
-              );
+          );
+        },
+        todayBuilder: (context, date, _) {
+          return FutureBuilder<Color>(
+            future: _getColorForDay(date),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey,
+                  ),
+                  margin: const EdgeInsets.all(6.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red,
+                  ),
+                  margin: const EdgeInsets.all(6.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              } else {
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: snapshot.data,
+                  ),
+                  margin: const EdgeInsets.all(6.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              }
             },
-            selectedBuilder: (context, date, _) {
-              return Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.blue, width: 2.0),
-                ),
-                margin: const EdgeInsets.all(6.0),
-                alignment: Alignment.center,
-                child: Text(
-                  date.day.toString(),
-                  style: const TextStyle(color: Colors.black),
-                ),
-              );
-            },
-          ),
-        );
+          );
+        },
+        
+        selectedBuilder: (context, date, _) {
+          return Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.blue, width: 2.0),
+            ),
+            margin: const EdgeInsets.all(6.0),
+            alignment: Alignment.center,
+            child: Text(
+              date.day.toString(),
+              style: const TextStyle(color: Colors.black),
+            ),
+          );
+        },
+      ),
+    );
   }
-   
-   
-    Widget customSizeBox() => SizedBox( height: 50.0,);
+
+  Widget customSizeBox() => SizedBox(
+    height: 50.0,
+  );
 }
