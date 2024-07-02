@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/const/color.dart';
-import 'package:remember_medicine/page/auth/login.dart'; // Login_page import edin
+import 'package:remember_medicine/page/auth/login.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -18,32 +18,64 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    String topImage = "lib/assest/image/upside.png";
+    String bottomImage = "lib/assest/image/downside.png";
+    double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Şifre yenileme gönderilecek e-postayı giriniz",
-              style: TextStyle(fontSize: 18, ),
-            ),
-            SizedBox(height: 20),
-            Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30.0,right: 30.0),
-                    child: emailTextField(),
-                  ),
-                  SizedBox(height: 50),
-                  sendEmailButton(),
-                ],
+      body: Column(
+        children: [
+          Container(
+            height: height * 0.2,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: AssetImage(topImage),
               ),
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Şifre yenileme gönderilecek e-postayı giriniz",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 20),
+                    Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                            child: emailTextField(),
+                          ),
+                          SizedBox(height: 50),
+                          sendEmailButton(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (keyboardHeight == 0) 
+            Container(
+              height: height * 0.2,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: AssetImage(bottomImage),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -56,15 +88,19 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           await sendPasswordResetLink(emailController.text);
         }
       },
-      child: Text("Şifre Yenile !", style: TextStyle(
-        fontSize: 20,
-        color: HexColor(ButtonText),
-      ),),
+      child: Text(
+        "Şifre Yenile !",
+        style: TextStyle(
+          fontSize: 20,
+          color: HexColor(ButtonText),
+        ),
+      ),
       style: ElevatedButton.styleFrom(
         backgroundColor: HexColor(buttonColor2),
         padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20)),
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
     );
   }

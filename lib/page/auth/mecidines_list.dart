@@ -269,7 +269,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
     );
   }
 
-  Widget customSizeBox() => SizedBox(height: 20.0);
+  Widget customSizeBox() => SizedBox(height: 12.0);
 
   Drawer menuDrawer(BuildContext context) {
     return Drawer(
@@ -279,7 +279,7 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
             child: Text(
               "Menü",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 25,
                 color: Colors.black,
               ),
             ),
@@ -288,13 +288,13 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           ListTile(
             leading: Icon(
               Icons.home,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Anasayfa",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -309,13 +309,13 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           ListTile(
             leading: Icon(
               Icons.library_books,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "İlaç Listesi",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -330,13 +330,13 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           ListTile(
             leading: Icon(
               Icons.calendar_month,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Takvim",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -351,13 +351,13 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           ListTile(
             leading: Icon(
               Icons.person_add_alt_1_sharp,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Acil Durum",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -372,13 +372,13 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           ListTile(
             leading: Icon(
               Icons.person,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Profil",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -393,13 +393,13 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
           ListTile(
             leading: Icon(
               Icons.logout,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Çıkış Yap",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -412,6 +412,4 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
       ),
     );
   }
-
-
 }

@@ -40,12 +40,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void fetchUserData() async {
     User? user = firebaseAuth.currentUser;
     if (user != null) {
-      DatabaseReference userRef = databaseReference.child('users').child(user.uid);
+      DatabaseReference userRef =
+          databaseReference.child('users').child(user.uid);
       userRef.once().then((DatabaseEvent event) {
         DataSnapshot snapshot = event.snapshot;
         setState(() {
           if (snapshot.value != null) {
-            Map<dynamic, dynamic> userData = snapshot.value as Map<dynamic, dynamic>;
+            Map<dynamic, dynamic> userData =
+                snapshot.value as Map<dynamic, dynamic>;
             nameController.text = userData['name'];
             surnameController.text = userData['surname'];
             emailController.text = userData['email'];
@@ -74,7 +76,8 @@ class _ProfilePageState extends State<ProfilePage> {
   void updateUserData() async {
     User? user = firebaseAuth.currentUser;
     if (user != null) {
-      DatabaseReference userRef = databaseReference.child('users').child(user.uid);
+      DatabaseReference userRef =
+          databaseReference.child('users').child(user.uid);
       await userRef.update({
         'name': nameController.text,
         'surname': surnameController.text,
@@ -91,7 +94,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-
   Future<void> signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
 
@@ -106,15 +108,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:    Text(
-                "Kullanıcı Bilgilerini Güncelle",
-                style: TextStyle(
-                  fontSize: 25,
-                  color: Color.fromARGB(255, 58, 57, 57),
-                ),
-              ),
-   
-        
+        title: Text(
+          "Kullanıcı Bilgilerini Güncelle",
+          style: TextStyle(
+            fontSize: 25,
+            color: Color.fromARGB(255, 58, 57, 57),
+          ),
+        ),
       ),
       drawer: menuDrawer(context),
       body: Padding(
@@ -126,41 +126,46 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget personInfo() {
     return Padding(
-      padding: const EdgeInsets.only(right: 15.0,left: 15.0),
+      padding: const EdgeInsets.only(right: 15.0, left: 15.0),
       child: ListView(
-          children: [
-            customTextField("Ad", nameController),
-            customTextField("Soyad", surnameController, ),
-            customTextField("E-Mail", emailController),
-            customTextField("Telefon", numberController),
-            customTextField("Yaş", ageController),
-            customTextField("Cinsiyet", genderController),
-            customTextField("Kilo", weightController),
-            customTextField("Boy", heightController),
-            SizedBox(height: 20.0),
-            Padding(
-              padding: const EdgeInsets.only(right: 100.0,left: 100.0),
-              child: ElevatedButton(
-                
-                onPressed: updateUserData,
-                child: Text('Güncelle', style: TextStyle(
+        children: [
+          customTextField("Ad", nameController),
+          customTextField(
+            "Soyad",
+            surnameController,
+          ),
+          customTextField("E-Mail", emailController),
+          customTextField("Telefon", numberController),
+          customTextField("Yaş", ageController),
+          customTextField("Cinsiyet", genderController),
+          customTextField("Kilo", weightController),
+          customTextField("Boy", heightController),
+          SizedBox(height: 20.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40.0),
+            child: ElevatedButton(
+              onPressed: updateUserData,
+              child: Text(
+                'Güncelle',
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
-                ),),
-                style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 25,vertical: 25 ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                backgroundColor: HexColor(buttonColor),
-                
                 ),
               ),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25)),
+                backgroundColor: HexColor(buttonColor),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
-   Drawer menuDrawer(BuildContext context) {
+  Drawer menuDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         children: [
@@ -168,7 +173,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Text(
               "Menü",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 25,
                 color: Colors.black,
               ),
             ),
@@ -177,13 +182,13 @@ class _ProfilePageState extends State<ProfilePage> {
           ListTile(
             leading: Icon(
               Icons.home,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Anasayfa",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -196,15 +201,15 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           customSizeBox(),
           ListTile(
-             leading: Icon(
+            leading: Icon(
               Icons.library_books,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "İlaç Listesi",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -219,13 +224,13 @@ class _ProfilePageState extends State<ProfilePage> {
           ListTile(
             leading: Icon(
               Icons.calendar_month,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Takvim",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -240,13 +245,13 @@ class _ProfilePageState extends State<ProfilePage> {
           ListTile(
             leading: Icon(
               Icons.person_add_alt_1_sharp,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Acil Durum",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -261,13 +266,13 @@ class _ProfilePageState extends State<ProfilePage> {
           ListTile(
             leading: Icon(
               Icons.person,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Profil",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -281,14 +286,14 @@ class _ProfilePageState extends State<ProfilePage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.exit_to_app,
-              size: 30,
+              Icons.logout,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
-              "Çıkış",
+              "Çıkış Yap",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -296,6 +301,7 @@ class _ProfilePageState extends State<ProfilePage> {
               signOut(context);
             },
           ),
+          customSizeBox(),
         ],
       ),
     );
@@ -310,18 +316,16 @@ class _ProfilePageState extends State<ProfilePage> {
         decoration: InputDecoration(
           labelText: label,
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color:HexColor(textfieldColor)),
+            borderSide: BorderSide(color: HexColor(textfieldColor)),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: HexColor(textfieldColor))
-          ),
-        
-          
+              borderSide: BorderSide(color: HexColor(textfieldColor))),
         ),
       ),
     );
   }
 
-
-  Widget customSizeBox() => SizedBox(height: 20.0,);
+  Widget customSizeBox() => SizedBox(
+        height: 12.0,
+      );
 }

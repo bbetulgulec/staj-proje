@@ -1,10 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/const/color.dart';
-import 'package:remember_medicine/page/auth/info_medicine.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -21,21 +19,23 @@ class _AccountPageState extends State<AccountPage> {
   final formKey = GlobalKey<FormState>();
   final firebaseAuth = FirebaseAuth.instance;
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
-  bool _obscureText = true; // Şifre gizleme durumu
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     String topImage = "lib/assest/image/upside.png";
     String bottomImage = "lib/assest/image/downside.png";
+
     return Scaffold(
       body: Stack(
         children: [
-          appBody(height, topImage, bottomImage),
+          appBody(height, width, topImage, bottomImage),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: height * .0,
+              height: height * 0.0,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   fit: BoxFit.cover,
@@ -49,14 +49,14 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  SingleChildScrollView appBody(double height, String topImage, String bottomImage) {
+  SingleChildScrollView appBody(double height, double width, String topImage, String bottomImage) {
     return SingleChildScrollView(
       child: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: height * .17,
+              height: height * 0.17,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   fit: BoxFit.cover,
@@ -65,7 +65,7 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
               child: Form(
                 key: formKey,
                 child: Column(
@@ -93,16 +93,16 @@ class _AccountPageState extends State<AccountPage> {
                     passwordtextfield(),
                     customSizeBox(),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+                      padding: EdgeInsets.symmetric(horizontal: width * 0.1),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          backToLoginButton(),
-                          createAccountButton(),
+                          Flexible(child: backToLoginButton()),
+                          SizedBox(width: 10),
+                          Flexible(child: createAccountButton()),
                         ],
                       ),
                     ),
-                    
                   ],
                 ),
               ),
@@ -116,12 +116,12 @@ class _AccountPageState extends State<AccountPage> {
   Widget titleText() {
     return Center(
       child: Text(
-        "HESAP OLUŞTUR ",
+        "HESAP OLUŞTUR",
         style: TextStyle(
           fontSize: 27,
           fontWeight: FontWeight.w500,
           fontStyle: FontStyle.italic,
-          color: HexColor(primaryColor), // replace with your primaryColor
+          color: HexColor(primaryColor),
         ),
       ),
     );
@@ -131,7 +131,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Adınızı giriniz ";
+          return "Adınızı giriniz";
         } else {
           return null;
         }
@@ -140,7 +140,7 @@ class _AccountPageState extends State<AccountPage> {
         name = value!.toUpperCase();
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Ad "),
+      decoration: customInputDecoration("Ad"),
     );
   }
 
@@ -148,7 +148,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Soyisminizi giriniz ";
+          return "Soyisminizi giriniz";
         } else {
           return null;
         }
@@ -157,7 +157,7 @@ class _AccountPageState extends State<AccountPage> {
         surname = value!.toUpperCase();
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Soyad "),
+      decoration: customInputDecoration("Soyad"),
     );
   }
 
@@ -165,7 +165,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Yaşınızı giriniz ";
+          return "Yaşınızı giriniz";
         } else {
           return null;
         }
@@ -174,7 +174,7 @@ class _AccountPageState extends State<AccountPage> {
         age = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Yaş "),
+      decoration: customInputDecoration("Yaş"),
     );
   }
 
@@ -182,7 +182,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Telefonunuzu giriniz ";
+          return "Telefonunuzu giriniz";
         } else {
           return null;
         }
@@ -191,7 +191,7 @@ class _AccountPageState extends State<AccountPage> {
         number = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Telefon "),
+      decoration: customInputDecoration("Telefon"),
     );
   }
 
@@ -199,7 +199,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Boyunuzu giriniz ";
+          return "Boyunuzu giriniz";
         } else {
           return null;
         }
@@ -208,7 +208,7 @@ class _AccountPageState extends State<AccountPage> {
         height = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Boy "),
+      decoration: customInputDecoration("Boy"),
     );
   }
 
@@ -216,7 +216,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Kilonuzu giriniz ";
+          return "Kilonuzu giriniz";
         } else {
           return null;
         }
@@ -225,7 +225,7 @@ class _AccountPageState extends State<AccountPage> {
         weight = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Kilo "),
+      decoration: customInputDecoration("Kilo"),
     );
   }
 
@@ -233,7 +233,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Cinsiyetinizi giriniz ";
+          return "Cinsiyetinizi giriniz";
         } else {
           return null;
         }
@@ -242,7 +242,7 @@ class _AccountPageState extends State<AccountPage> {
         gender = value!.toUpperCase();
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("Cinsiyet "),
+      decoration: customInputDecoration("Cinsiyet"),
     );
   }
 
@@ -250,8 +250,8 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Bir e-posta adresi giriniz ";
-        } else if (!EmailValidator.validate(value!)) {
+          return "Bir e-posta adresi giriniz";
+        } else if (!EmailValidator.validate(value)) {
           return "Geçerli bir e-posta adresi giriniz";
         } else {
           return null;
@@ -261,7 +261,7 @@ class _AccountPageState extends State<AccountPage> {
         email = value!;
       },
       style: TextStyle(color: Colors.black),
-      decoration: customInputDecoration("E-Mail "),
+      decoration: customInputDecoration("E-Mail"),
     );
   }
 
@@ -269,7 +269,7 @@ class _AccountPageState extends State<AccountPage> {
     return TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
-          return "Şifrenizi giriniz ";
+          return "Şifrenizi giriniz";
         } else if (value.length < 6) {
           return "Şifreniz en az 6 karakter olmalıdır";
         } else {
@@ -279,7 +279,7 @@ class _AccountPageState extends State<AccountPage> {
       onSaved: (value) {
         password = value!;
       },
-      obscureText: _obscureText, // Şifre gizleme durumu
+      obscureText: _obscureText,
       decoration: InputDecoration(
         hintText: "Şifre",
         hintStyle: TextStyle(
@@ -287,10 +287,10 @@ class _AccountPageState extends State<AccountPage> {
           fontSize: 20,
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your backgroundColor
+          borderSide: BorderSide(color: HexColor(textfieldColor)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your buttonColor
+          borderSide: BorderSide(color: HexColor(textfieldColor)),
         ),
         suffixIcon: IconButton(
           icon: Icon(
@@ -314,13 +314,13 @@ class _AccountPageState extends State<AccountPage> {
           "Kayıt Et",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 23.0,
+            fontSize: 15.0,
           ),
         ),
         icon: Icon(Icons.check, color: Colors.white),
         style: ElevatedButton.styleFrom(
-          backgroundColor: HexColor(buttonColor), // replace with your buttonColor
-          padding: EdgeInsets.symmetric(horizontal: 25),
+          backgroundColor: HexColor(buttonColor),
+          padding: EdgeInsets.symmetric(horizontal: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -333,7 +333,6 @@ class _AccountPageState extends State<AccountPage> {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
       try {
-        // Kullanıcıyı Firebase Authentication ile oluştur
         UserCredential userCredential = await firebaseAuth.createUserWithEmailAndPassword(
           email: email,
           password: password,
@@ -341,11 +340,9 @@ class _AccountPageState extends State<AccountPage> {
         User user = userCredential.user!;
         print('Veri başarıyla authenticationa kayıt oldu');
 
-        // Kullanıcıya doğrulama e-postası gönder
         await user.sendEmailVerification();
         print('Doğrulama e-postası gönderildi');
 
-        // Kullanıcı bilgilerini Firebase Realtime Database'e kaydet
         await databaseReference.child('users').child(user.uid).set({
           'name': name,
           'surname': surname,
@@ -370,7 +367,6 @@ class _AccountPageState extends State<AccountPage> {
           ),
         );
 
-        // Kullanıcı doğrulamayı tamamlayana kadar giriş sayfasına yönlendirme
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Login_page()),
@@ -403,14 +399,14 @@ class _AccountPageState extends State<AccountPage> {
         label: Text(
           "Giriş sayfasına  geri dön",
           style: TextStyle(
-            color:HexColor(ButtonText),
-            fontSize: 15.0,
+            color: HexColor(ButtonText),
+            fontSize: 10.0,
           ),
         ),
         icon: Icon(Icons.arrow_back_ios_new, color: Colors.black45),
         style: ElevatedButton.styleFrom(
-          backgroundColor: HexColor(buttonColor2), // replace with your buttonColor
-          padding: EdgeInsets.symmetric(horizontal: 25,vertical: 20),
+          backgroundColor: HexColor(buttonColor2),
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -419,7 +415,7 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget customSizeBox() => SizedBox(height: 40.0,);
+  Widget customSizeBox() => SizedBox(height: 40.0);
 
   InputDecoration customInputDecoration(String hintText) {
     return InputDecoration(
@@ -429,10 +425,10 @@ class _AccountPageState extends State<AccountPage> {
         fontSize: 20,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your backgroundColor
+        borderSide: BorderSide(color: HexColor(textfieldColor)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: HexColor(textfieldColor)), // replace with your buttonColor
+        borderSide: BorderSide(color: HexColor(textfieldColor)),
       ),
     );
   }

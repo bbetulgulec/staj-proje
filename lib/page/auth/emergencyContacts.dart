@@ -247,7 +247,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
-                                                Navigator.of(context).pop(false),
+                                                Navigator.of(context)
+                                                    .pop(false),
                                             child: Text('Hayır'),
                                           ),
                                           TextButton(
@@ -289,7 +290,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             child: Text(
               "Menü",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 25,
                 color: Colors.black,
               ),
             ),
@@ -298,13 +299,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
           ListTile(
             leading: Icon(
               Icons.home,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Anasayfa",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -319,13 +320,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
           ListTile(
             leading: Icon(
               Icons.library_books,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "İlaç Listesi",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -339,14 +340,14 @@ class _EmergencyPageState extends State<EmergencyPage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.note_add_outlined,
-              size: 30,
+              Icons.calendar_month,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
-              "Raporlar",
+              "Takvim",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -360,14 +361,35 @@ class _EmergencyPageState extends State<EmergencyPage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
+              Icons.person_add_alt_1_sharp,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Acil Durum",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => EmergencyPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
               Icons.person,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Profil",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -381,21 +403,22 @@ class _EmergencyPageState extends State<EmergencyPage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.exit_to_app,
-              size: 30,
+              Icons.logout,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
-              "Çıkış",
+              "Çıkış Yap",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
-            onTap: () async {
-              await signOut(context);
+            onTap: () {
+              signOut(context);
             },
           ),
+          customSizeBox(),
         ],
       ),
     );
@@ -411,7 +434,12 @@ class _EmergencyPageState extends State<EmergencyPage> {
   Future<void> _saveEmergency() async {
     String userId = firebaseAuth.currentUser!.uid;
 
-    await databaseReference.child('users').child(userId).child('emergencies').push().set({
+    await databaseReference
+        .child('users')
+        .child(userId)
+        .child('emergencies')
+        .push()
+        .set({
       'emergencyName': userNameController.text,
       'emergencyNumber': userNumberController.text,
     });
@@ -422,7 +450,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
     setState(() {});
   }
 
-  Future<void> _updateEmergency(String userId, String key, dynamic emergency) async {
+  Future<void> _updateEmergency(
+      String userId, String key, dynamic emergency) async {
     showDialog(
       context: context,
       builder: (context) {
@@ -431,11 +460,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
           content: Column(
             children: [
               TextField(
-                controller: userNameController..text = emergency['emergencyName'],
+                controller: userNameController
+                  ..text = emergency['emergencyName'],
                 decoration: InputDecoration(labelText: 'Adı'),
               ),
               TextField(
-                controller: userNumberController..text = emergency['emergencyNumber'],
+                controller: userNumberController
+                  ..text = emergency['emergencyNumber'],
                 decoration: InputDecoration(labelText: 'Numarası'),
               ),
             ],
@@ -443,7 +474,12 @@ class _EmergencyPageState extends State<EmergencyPage> {
           actions: [
             TextButton(
               onPressed: () async {
-                await databaseReference.child('users').child(userId).child('emergencies').child(key).update({
+                await databaseReference
+                    .child('users')
+                    .child(userId)
+                    .child('emergencies')
+                    .child(key)
+                    .update({
                   'emergencyName': userNameController.text,
                   'emergencyNumber': userNumberController.text,
                 });
@@ -460,11 +496,16 @@ class _EmergencyPageState extends State<EmergencyPage> {
   }
 
   Future<void> _deleteEmergency(String userId, String key) async {
-    await databaseReference.child('users').child(userId).child('emergencies').child(key).remove();
+    await databaseReference
+        .child('users')
+        .child(userId)
+        .child('emergencies')
+        .child(key)
+        .remove();
     setState(() {});
   }
 
   SizedBox customSizeBox() {
-    return SizedBox(height: 15.0);
+    return SizedBox(height: 12.0);
   }
 }

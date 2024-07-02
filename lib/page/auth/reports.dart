@@ -226,6 +226,7 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
+
   Drawer menuDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -234,7 +235,7 @@ class _ReportsPageState extends State<ReportsPage> {
             child: Text(
               "Menü",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 25,
                 color: Colors.black,
               ),
             ),
@@ -243,13 +244,13 @@ class _ReportsPageState extends State<ReportsPage> {
           ListTile(
             leading: Icon(
               Icons.home,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Anasayfa",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -264,13 +265,13 @@ class _ReportsPageState extends State<ReportsPage> {
           ListTile(
             leading: Icon(
               Icons.library_books,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "İlaç Listesi",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -285,13 +286,13 @@ class _ReportsPageState extends State<ReportsPage> {
           ListTile(
             leading: Icon(
               Icons.calendar_month,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Takvim",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -305,14 +306,14 @@ class _ReportsPageState extends State<ReportsPage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.emergency,
-              size: 30,
+              Icons.person_add_alt_1_sharp,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Acil Durum",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -327,13 +328,13 @@ class _ReportsPageState extends State<ReportsPage> {
           ListTile(
             leading: Icon(
               Icons.person,
-              size: 30,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
               "Profil",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -347,14 +348,14 @@ class _ReportsPageState extends State<ReportsPage> {
           customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.exit_to_app,
-              size: 30,
+              Icons.logout,
+              size: 22,
               color: Colors.black45,
             ),
             title: const Text(
-              "Çıkış",
+              "Çıkış Yap",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
               ),
             ),
@@ -362,6 +363,7 @@ class _ReportsPageState extends State<ReportsPage> {
               signOut(context);
             },
           ),
+          customSizeBox(),
         ],
       ),
     );
@@ -507,6 +509,6 @@ class _ReportsPageState extends State<ReportsPage> {
   }
 
   Widget customSizeBox() => SizedBox(
-    height: 50.0,
+    height: 12.0,
   );
 }
