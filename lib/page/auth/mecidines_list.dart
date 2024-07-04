@@ -7,6 +7,7 @@ import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/medicines.dart';
+import 'package:remember_medicine/page/auth/notification.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
 import 'package:remember_medicine/page/auth/reports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -302,6 +303,27 @@ class _MedicinesListPageState extends State<MedicinesListPage> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.alarm,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Alarm",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Notification_page()),
               );
             },
           ),

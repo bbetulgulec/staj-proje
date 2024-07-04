@@ -8,6 +8,7 @@ import 'package:remember_medicine/const/color.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/notification.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
 import 'package:remember_medicine/page/auth/reports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -313,6 +314,27 @@ class _EmergencyPageState extends State<EmergencyPage> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.alarm,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Alarmlar",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Notification_page()),
               );
             },
           ),

@@ -8,6 +8,7 @@ import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/notification.dart';
 import 'package:remember_medicine/page/auth/reports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -111,7 +112,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text(
           "Kullanıcı Bilgilerini Güncelle",
           style: TextStyle(
-            fontSize: 25,
+            fontSize: 15,
             color: Color.fromARGB(255, 58, 57, 57),
           ),
         ),
@@ -196,6 +197,27 @@ class _ProfilePageState extends State<ProfilePage> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.alarm,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Alarm",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Notification_page()),
               );
             },
           ),

@@ -1,13 +1,24 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart'; // Bu satırı ekleyin
 import 'package:provider/provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:remember_medicine/Model/Model.dart';
 import 'package:remember_medicine/Provider/Provier.dart';
 import 'package:remember_medicine/Screen/Add_Alarm.dart';
+import 'package:remember_medicine/const/color.dart';
+import 'package:remember_medicine/page/auth/emergencyContacts.dart';
+import 'package:remember_medicine/page/auth/home.dart';
+import 'package:remember_medicine/page/auth/login.dart';
+import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/profile.dart';
+import 'package:remember_medicine/page/auth/reports.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -27,8 +38,7 @@ class _Notification_pageState extends State<Notification_page> {
 
     // Zaman dilimini ayarla
     tz.initializeTimeZones();
-    tz.setLocalLocation(
-        tz.getLocation('Europe/Istanbul')); // Örneğin, Istanbul zaman dilimi
+    tz.setLocalLocation(tz.getLocation('Europe/Istanbul')); // Örneğin, Istanbul zaman dilimi
 
     // Bildirim izni iste (opsiyonel, uygulama ilk kez açılırken istenebilir)
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -47,43 +57,47 @@ class _Notification_pageState extends State<Notification_page> {
 
     // Verileri getir
     context.read<alarmprovider>().GetData();
+
+    // Locale'i Türkçe olarak ayarla ve initializeDateFormatting fonksiyonunu çağır
+    Intl.defaultLocale = 'tr'; // Bu satırı ekledik
+    initializeDateFormatting('tr', null).then((_) { // Bu satırı ekledik
+      setState(() {}); // UI'ı güncelle
+    });
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Login_page()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEEEFF5),
       appBar: AppBar(
-        backgroundColor: Colors.deepPurpleAccent,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              Icons.menu,
-              color: Colors.white,
-            ),
-          )
-        ],
         title: const Text(
-          'Alarm Saati',
-          style: TextStyle(color: Colors.white),
+          'Alarm Oluştur',
+          style: TextStyle(color: Colors.black),
         ),
-        centerTitle: true,
       ),
+      drawer: menuDrawer(context),
       body: ListView(
         children: [
           Container(
-            decoration: BoxDecoration(
-                color: Colors.deepPurpleAccent,
-                borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             height: MediaQuery.of(context).size.height * 0.1,
             child: Center(
               child: Text(
-                DateFormat.yMEd().add_jms().format(DateTime.now()),
+                // Tarih ve saat formatını Türkçe olarak ayarladık
+                DateFormat.yMMMMEEEEd('tr').add_jms().format(DateTime.now()), // Bu satırı değiştirdik
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.white,
+                  color: Colors.black45,
                 ),
               ),
             ),
@@ -124,7 +138,9 @@ class _Notification_pageState extends State<Notification_page> {
                                     Padding(
                                       padding: const EdgeInsets.only(left: 8.0),
                                       child: Text(
-                                        "|" + alarm.modelist[index].label.toString(),
+                                        "|" +
+                                            alarm.modelist[index].label
+                                                .toString(),
                                       ),
                                     ),
                                   ],
@@ -136,8 +152,10 @@ class _Notification_pageState extends State<Notification_page> {
                                       : alarm.modelist[index].check,
                                   onChanged: (v) {
                                     alarm.EditSwitch(index, v);
-                                    alarm.CancelNotification(alarm.modelist[index].id!);
+                                    alarm.CancelNotification(
+                                        alarm.modelist[index].id!);
                                   },
+                                  activeColor: HexColor(buttonColor),
                                 ),
                               ],
                             ),
@@ -192,4 +210,169 @@ class _Notification_pageState extends State<Notification_page> {
       ),
     );
   }
+
+  Drawer menuDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          Center(
+            child: Text(
+              "Menü",
+              style: TextStyle(
+                fontSize: 25,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.home,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Anasayfa",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.alarm,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Alarm",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Notification_page()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.library_books,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "İlaç Listesi",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MedicinesListPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.calendar_month,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Takvim",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ReportsPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.person_add_alt_1_sharp,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Acil Durum",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => EmergencyPage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.person,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Profil",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.logout,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Çıkış Yap",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              signOut(context);
+            },
+          ),
+          customSizeBox(),
+        ],
+      ),
+    );
+  }
+
+  SizedBox customSizeBox() => SizedBox(height: 12);
 }

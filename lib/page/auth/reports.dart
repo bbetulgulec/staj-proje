@@ -3,6 +3,7 @@ import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/home.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/notification.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -55,7 +56,8 @@ class _ReportsPageState extends State<ReportsPage> {
         List<Map<String, dynamic>> medicinesForToday = [];
 
         if (snapshot.value != null && snapshot.value is Map) {
-          Map<dynamic, dynamic> medicinesData = snapshot.value as Map<dynamic, dynamic>;
+          Map<dynamic, dynamic> medicinesData =
+              snapshot.value as Map<dynamic, dynamic>;
 
           medicinesData.forEach((day, medicineDetails) {
             if (medicineDetails is Map && day == todayString) {
@@ -95,7 +97,8 @@ class _ReportsPageState extends State<ReportsPage> {
       DataSnapshot snapshot = event.snapshot;
 
       if (snapshot.value != null && snapshot.value is Map) {
-        Map<dynamic, dynamic> usedMedicinesData = snapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> usedMedicinesData =
+            snapshot.value as Map<dynamic, dynamic>;
         Set<String> usedMedicinesSet = Set<String>();
 
         usedMedicinesData.forEach((medicineName, medicineDetails) {
@@ -109,7 +112,8 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchUsedMedicinesForDay(DateTime day) async {
+  Future<List<Map<String, dynamic>>> _fetchUsedMedicinesForDay(
+      DateTime day) async {
     User? currentUser = mAuth.currentUser;
     List<Map<String, dynamic>> eventsForDay = [];
     if (currentUser != null) {
@@ -125,7 +129,8 @@ class _ReportsPageState extends State<ReportsPage> {
       DataSnapshot snapshot = event.snapshot;
 
       if (snapshot.value != null && snapshot.value is Map) {
-        Map<dynamic, dynamic> usedMedicinesData = snapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> usedMedicinesData =
+            snapshot.value as Map<dynamic, dynamic>;
 
         usedMedicinesData.forEach((medicineName, medicineDetails) {
           eventsForDay.add({
@@ -140,8 +145,10 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Future<Color> _getColorForDay(DateTime day) async {
     String dayString = '${day.year}-${day.month}-${day.day}';
-    if (dayString == '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}') {
-      if (usedMedicines.length == todayMedicinesCount && todayMedicinesCount > 0) {
+    if (dayString ==
+        '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}') {
+      if (usedMedicines.length == todayMedicinesCount &&
+          todayMedicinesCount > 0) {
         return Colors.green;
       } else if (usedMedicines.isNotEmpty) {
         return Colors.yellow;
@@ -149,9 +156,8 @@ class _ReportsPageState extends State<ReportsPage> {
         return Colors.red;
       }
     } else if (day.isAfter(DateTime.now())) {
-      return Color.fromARGB(255, 214, 211, 211); 
-    } 
-    else {
+      return Color.fromARGB(255, 214, 211, 211);
+    } else {
       DatabaseReference dayRef = databaseReference
           .child('users')
           .child(mAuth.currentUser!.uid)
@@ -215,7 +221,8 @@ class _ReportsPageState extends State<ReportsPage> {
                           .split(',')
                           .map<Widget>((time) => Chip(
                                 label: Text(time),
-                                backgroundColor: isUsed ? Colors.green : Colors.red,
+                                backgroundColor:
+                                    isUsed ? Colors.green : Colors.red,
                               ))
                           .toList(),
                     ),
@@ -225,7 +232,6 @@ class _ReportsPageState extends State<ReportsPage> {
             ),
     );
   }
-
 
   Drawer menuDrawer(BuildContext context) {
     return Drawer(
@@ -258,6 +264,27 @@ class _ReportsPageState extends State<ReportsPage> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.alarm,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Alarm",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Notification_page()),
               );
             },
           ),
@@ -489,7 +516,6 @@ class _ReportsPageState extends State<ReportsPage> {
             },
           );
         },
-        
         selectedBuilder: (context, date, _) {
           return Container(
             decoration: BoxDecoration(
@@ -509,6 +535,6 @@ class _ReportsPageState extends State<ReportsPage> {
   }
 
   Widget customSizeBox() => SizedBox(
-    height: 12.0,
-  );
+        height: 12.0,
+      );
 }

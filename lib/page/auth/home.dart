@@ -311,15 +311,15 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-           customSizeBox(),
+          customSizeBox(),
           ListTile(
             leading: Icon(
-              Icons.home,
+              Icons.alarm,
               size: 22,
               color: Colors.black45,
             ),
             title: const Text(
-              "Takvimler",
+              "Alarm",
               style: TextStyle(
                 fontSize: 22,
                 color: Color.fromARGB(255, 53, 49, 49),
@@ -416,23 +416,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-             customSizeBox(),
-          ListTile(
-            leading: Icon(
-              Icons.alarm,
-              size: 22,
-              color: Colors.black45,
-            ),
-            title: const Text(
-              "Alarmlar",
-              style: TextStyle(
-                fontSize: 22,
-                color: Color.fromARGB(255, 53, 49, 49),
-              ),
-            ),
-            onTap: () {
-            },
-          ),
           customSizeBox(),
           ListTile(
             leading: Icon(
@@ -472,7 +455,7 @@ class _HomePageState extends State<HomePage> {
           return Card(
             elevation: 12,
             child: Padding(
-              padding: const EdgeInsets.only(top: 10.0, right: 5.0,left: 5.0),
+              padding: const EdgeInsets.only(top: 10.0, right: 5.0, left: 5.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -553,6 +536,4 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-
-
 }

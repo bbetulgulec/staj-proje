@@ -1,10 +1,12 @@
 import 'dart:math';
 
+import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/Provider/Provier.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:remember_medicine/const/color.dart';
 
 class AddAlarm extends StatefulWidget {
   const AddAlarm({super.key});
@@ -21,7 +23,7 @@ class _AddAlaramState extends State<AddAlarm> {
 
   DateTime? notificationtime;
 
-  String? name = "none";
+  String? name = "";
   int ? Milliseconds;
 
   @override
@@ -35,91 +37,123 @@ class _AddAlaramState extends State<AddAlarm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(Icons.check),
-          )
-        ],
+        backgroundColor: HexColor(backgroundColor),
         automaticallyImplyLeading: true,
         title: const Text(
-          'Add Alarm',
+          'Alarm Ekle',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        
       ),
+      
+  
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            height: MediaQuery.of(context).size.height * 0.3,
-            width: MediaQuery.of(context).size.width,
-            child: Center(
-                child: CupertinoDatePicker(
-              showDayOfWeek: true,
-              minimumDate: DateTime.now(),
-              dateOrder: DatePickerDateOrder.dmy,
-              onDateTimeChanged: (va) {
-                dateTime = DateFormat().add_jms().format(va);
-
-                Milliseconds = va.microsecondsSinceEpoch;
-
-                notificationtime = va;
-
-                print(dateTime);
-              },
-            )),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-                width: MediaQuery.of(context).size.width,
-                child: CupertinoTextField(
-                  placeholder: "Add Label",
-                  controller: controller,
-                )),
-          ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(" Repeat daily"),
-              ),
-              CupertinoSwitch(
-                value: repeat,
-                onChanged: (bool value) {
-                  repeat = value;
-
-                  if (repeat == false) {
-                    name = "none";
-                  } else {
-                    name = "Everyday";
-                  }
-
-                  setState(() {});
-                },
-              ),
-            ],
-          ),
-          ElevatedButton(
-              onPressed: () {
-                Random random = new Random();
-                int randomNumber = random.nextInt(100);
-
-                context.read<alarmprovider>().SetAlaram(
-                    controller.text, dateTime!, true, name!, randomNumber,Milliseconds!);
-                context.read<alarmprovider>().SetData();
-
-                context
-                    .read<alarmprovider>()
-                    .SecduleNotification(notificationtime!, randomNumber);
-
-                Navigator.pop(context);
-              },
-              child: Text("Set Alaram")),
+          dateCalender(context),
+          customSizeBox(),
+          madicaneName(context),
+          customSizeBox(),
+          swicthRepeatDaily(),
+          customSizeBox(),
+          setAlarms(context),
         ],
       ),
     );
   }
+
+  Container dateCalender(BuildContext context) {
+    return Container(
+          height: MediaQuery.of(context).size.height * 0.3,
+          width: MediaQuery.of(context).size.width,
+          child: Center(
+              child: CupertinoDatePicker(
+            showDayOfWeek: true,
+            minimumDate: DateTime.now(),
+            dateOrder: DatePickerDateOrder.dmy,
+            onDateTimeChanged: (va) {
+              dateTime = DateFormat().add_jms().format(va);
+
+              Milliseconds = va.microsecondsSinceEpoch;
+
+              notificationtime = va;
+
+              print(dateTime);
+            },
+          )),
+        );
+  }
+
+  Padding madicaneName(BuildContext context) {
+    return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CupertinoTextField(
+                  placeholder: "İlaç Adı",
+                  controller: controller,
+                  style: TextStyle(
+                    fontSize: 25,
+                  ),
+                ),
+              )),
+        );
+  }
+
+  Row swicthRepeatDaily() {
+    return Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Hergün tekrarlasın mı "),
+            ),
+            CupertinoSwitch(
+              value: repeat,
+              onChanged: (bool value) {
+                repeat = value;
+
+                if (repeat == false) {
+                  name = "none";
+                } else {
+                  name = "Everyday";
+                }
+
+                setState(() {});
+              },
+            ),
+          ],
+        );
+  }
+
+  ElevatedButton setAlarms(BuildContext context) {
+    return ElevatedButton(
+            onPressed: () {
+              Random random = new Random();
+              int randomNumber = random.nextInt(100);
+
+              context.read<alarmprovider>().SetAlaram(
+                  controller.text, dateTime!, true, name!, randomNumber,Milliseconds!);
+              context.read<alarmprovider>().SetData();
+
+              context
+                  .read<alarmprovider>()
+                  .SecduleNotification(notificationtime!, randomNumber);
+
+              Navigator.pop(context);
+            },
+            child: Text("alarmı kur ", style: TextStyle(
+              
+            color:Colors.black54,
+            fontSize: 20,
+            fontStyle: FontStyle.italic,
+            backgroundColor: HexColor(buttonColor),
+            ),));
+  }
+  
+  SizedBox customSizeBox() => SizedBox(height: 12);
 }
