@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:remember_medicine/Provider/Provier.dart';
 import 'package:remember_medicine/splash.dart';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,7 +10,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
   );
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+    create: (contex) => alarmprovider(),
+    child: const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MyApp(),
+    ),
+  )
+  );
 }
 
 class MyApp extends StatelessWidget {

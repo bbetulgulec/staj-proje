@@ -23,6 +23,10 @@ dependencies:
   sleek_circular_slider: ^2.0.1
   flutter_local_notifications: ^17.2.1
   timezone: ^0.9.3
+  firebase_messaging: ^15.0.2
+  provider: ^6.1.2
+  permission_handler: ^11.3.1
+  another_flushbar: ^1.12.30
 
 dev_dependencies:
   flutter_test:

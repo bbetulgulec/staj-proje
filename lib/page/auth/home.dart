@@ -4,10 +4,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:remember_medicine/page/auth/emergencyContacts.dart';
 import 'package:remember_medicine/page/auth/login.dart';
 import 'package:remember_medicine/page/auth/mecidines_list.dart';
+import 'package:remember_medicine/page/auth/notification.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
 import 'package:remember_medicine/page/auth/reports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
+import 'package:remember_medicine/page/auth/notification.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -309,6 +311,27 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
+           customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.home,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Takvimler",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Notification_page()),
+              );
+            },
+          ),
           customSizeBox(),
           ListTile(
             leading: Icon(
@@ -391,6 +414,23 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(builder: (context) => ProfilePage()),
               );
+            },
+          ),
+             customSizeBox(),
+          ListTile(
+            leading: Icon(
+              Icons.alarm,
+              size: 22,
+              color: Colors.black45,
+            ),
+            title: const Text(
+              "Alarmlar",
+              style: TextStyle(
+                fontSize: 22,
+                color: Color.fromARGB(255, 53, 49, 49),
+              ),
+            ),
+            onTap: () {
             },
           ),
           customSizeBox(),
