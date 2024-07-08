@@ -20,6 +20,7 @@ class _LoginPageState extends State<Login_page> {
   final formKey = GlobalKey<FormState>();
   bool _obscureText = true;
 
+
   @override
   void initState() {
     super.initState();
@@ -28,12 +29,16 @@ class _LoginPageState extends State<Login_page> {
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
+
+    var keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    bool isKeyboardOpen = keyboardHeight > 0;
     String topImage = "lib/assest/image/upside.png";
     String bottomImage = "lib/assest/image/downside.png";
     return Scaffold(
         body: Stack(
       children: [
         appBody(height, topImage, bottomImage),
+        if(!isKeyboardOpen)
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
@@ -46,6 +51,7 @@ class _LoginPageState extends State<Login_page> {
           ),
         )
       ],
+
     ));
   }
 
@@ -85,8 +91,10 @@ class _LoginPageState extends State<Login_page> {
                   ],
                 ),
               ),
-            )
+            ),
+
           ],
+
         ),
       ),
     );
@@ -305,7 +313,7 @@ class _LoginPageState extends State<Login_page> {
   }
 
   Widget customSizeBox() => SizedBox(
-        height: 50.0,
+        height: 30.0,
       );
 
 

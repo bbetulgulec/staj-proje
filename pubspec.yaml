@@ -27,6 +27,8 @@ dependencies:
   provider: ^6.1.2
   permission_handler: ^11.3.1
   another_flushbar: ^1.12.30
+  flutter_blue_plus: ^1.32.8
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:

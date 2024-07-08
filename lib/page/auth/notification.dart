@@ -155,7 +155,6 @@ class _Notification_pageState extends State<Notification_page> {
                                     alarm.CancelNotification(
                                         alarm.modelist[index].id!);
                                   },
-                                  activeColor: HexColor(buttonColor),
                                 ),
                               ],
                             ),

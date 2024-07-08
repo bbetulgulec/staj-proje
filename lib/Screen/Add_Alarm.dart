@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:remember_medicine/Provider/Provier.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,12 +26,24 @@ class _AddAlaramState extends State<AddAlarm> {
   String? name = "";
   int ? Milliseconds;
 
+   static const platform = MethodChannel('com.example.my_wear_os_app/data');
+
   @override
   void initState() {
     controller = TextEditingController();
     context.read<alarmprovider>().GetData();
     super.initState();
   }
+
+    Future<void> _sendDataToWearOS(String data) async {
+    try {
+      final String result = await platform.invokeMethod('sendDataToWearOS', {'data': data});
+      print(result);
+    } on PlatformException catch (e) {
+      print("Failed to send data: '${e.message}'.");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +122,7 @@ class _AddAlaramState extends State<AddAlarm> {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text("Hergün tekrarlasın mı "),
+              child: Text("Hergün tekrarlansın mı ? "),
             ),
             CupertinoSwitch(
               value: repeat,
@@ -132,6 +144,7 @@ class _AddAlaramState extends State<AddAlarm> {
 
   ElevatedButton setAlarms(BuildContext context) {
     return ElevatedButton(
+      
             onPressed: () {
               Random random = new Random();
               int randomNumber = random.nextInt(100);
@@ -143,6 +156,8 @@ class _AddAlaramState extends State<AddAlarm> {
               context
                   .read<alarmprovider>()
                   .SecduleNotification(notificationtime!, randomNumber);
+                  // Veri gönderme işlemi
+        _sendDataToWearOS(controller.text + ' ' + dateTime!);
 
               Navigator.pop(context);
             },
@@ -151,8 +166,9 @@ class _AddAlaramState extends State<AddAlarm> {
             color:Colors.black54,
             fontSize: 20,
             fontStyle: FontStyle.italic,
-            backgroundColor: HexColor(buttonColor),
-            ),));
+            ),)
+            );
+
   }
   
   SizedBox customSizeBox() => SizedBox(height: 12);
