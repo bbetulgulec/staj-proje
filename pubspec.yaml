@@ -29,6 +29,10 @@ dependencies:
   another_flushbar: ^1.12.30
   flutter_blue_plus: ^1.32.8
   flutter_launcher_icons: ^0.13.1
+  flutter_blue: ^0.8.0
+  get: ^4.6.6
+  ble_controller: ^0.0.43
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

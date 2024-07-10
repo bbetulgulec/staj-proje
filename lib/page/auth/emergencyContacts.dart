@@ -11,6 +11,8 @@ import 'package:remember_medicine/page/auth/mecidines_list.dart';
 import 'package:remember_medicine/page/auth/profile.dart';
 import 'package:remember_medicine/page/auth/reports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class EmergencyPage extends StatefulWidget {
   const EmergencyPage({Key? key}) : super(key: key);
@@ -219,36 +221,37 @@ class _EmergencyPageState extends State<EmergencyPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Adı: ${emergency['emergencyName']}"),
-                                Text(
-                                    "Numarası: ${emergency['emergencyNumber']}"),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Adı: ${emergency['emergencyName']}"),
+                                  Text(
+                                      "Numarası: ${emergency['emergencyNumber']}"),
+                                ],
+                              ),
                             ),
                             Row(
                               children: [
-                                GestureDetector(
-                                  onTap: () {
+                                IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () {
                                     _updateEmergency(user.uid, key, emergency);
                                   },
-                                  child: Icon(Icons.edit),
                                 ),
-                                SizedBox(width: 8.0),
                                 IconButton(
                                   icon: Icon(Icons.delete),
                                   onPressed: () async {
                                     bool? confirmDelete = await showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title: Text(
-                                            'Silmek istediğinize emin misiniz?'),
+                                        title: Text('Sil'),
+                                        content: Text(
+                                            'Bu acil durum numarasını silmek istediğinizden emin misiniz?'),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop(false),
+                                                Navigator.of(context).pop(false),
                                             child: Text('Hayır'),
                                           ),
                                           TextButton(
@@ -263,6 +266,11 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                       _deleteEmergency(user.uid, key);
                                     }
                                   },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.call),
+                                  onPressed: () =>
+                                      _makePhoneCall(emergency['emergencyNumber']),
                                 ),
                               ],
                             ),
@@ -507,5 +515,31 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
   SizedBox customSizeBox() {
     return SizedBox(height: 12.0);
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final status = await Permission.phone.status;
+    if (status.isGranted) {
+      final Uri launchUri = Uri(
+        scheme: 'tel',
+        path: phoneNumber,
+      );
+      await launchUrl(launchUri);
+    } else if (status.isDenied) {
+      final newStatus = await Permission.phone.request();
+      if (newStatus.isGranted) {
+        final Uri launchUri = Uri(
+          scheme: 'tel',
+          path: phoneNumber,
+        );
+        await launchUrl(launchUri);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Telefon araması izni reddedildi')),
+        );
+      }
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
   }
 }

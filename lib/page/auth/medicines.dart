@@ -26,7 +26,7 @@ class _MedicinesPage2State extends State<MedicinesPage2> {
   List<String> selectedTimes = [];
 
   final List<String> days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-  final List<String> hours = ['08:00', '10:00', '12:00', '14:00', '21:47','16:00', '18:00', '20:00'];
+  final List<String> hours = ['08:00', '10:00', '12:00', '14:00', '21:47','16:00','10:25', '11:20', '18:00', '20:00'];
 
   @override
   void initState() {
